@@ -68,6 +68,8 @@ Todos los textos van en español rioplatense y todos los horarios en hora de Arg
 | Resultado de la carrera | Cuando están disponibles el resultado **y** las tablas de esa ronda | Top 10 con puntos, vuelta rápida, campeonato de pilotos (top 10, con los puntos sumados en la fecha) y de constructores (completo), más link a la web |
 | Campeón | Dentro del mensaje de resultado, en la fecha en que el título queda definido | Una línea extra: "X es campeón del mundo" (pilotos y/o constructores) |
 
+- Solo hay avisos de sesiones que empiezan desde la fecha de activación del reloj (`notifyFrom`), para que el primer arranque no publique la temporada ya cargada. *(Aprobado el 2026-11-26.)*
+- La previa también vence a los 30 minutos. Si a la hora de largada no hay grilla ni clasificación, el aviso sale igual, sin la tabla. Sin carreras por delante, el campeón es el P1 de la tabla. La clasificación sprint lista solo a quienes informe OpenF1. *(Aprobado el 2026-11-26.)*
 - Si Jolpica cambia el horario de una sesión, los avisos programados usan el horario nuevo, porque el calendario se resincroniza (sección 5.3).
 - Si el reloj estuvo caído y un aviso de horario ya pasó, se manda igual solo si no pasaron más de 30 minutos. Pasado ese tiempo se descarta. Los avisos de resultado no vencen. *(Decisión de Claude.)*
 
