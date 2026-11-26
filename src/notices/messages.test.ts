@@ -155,6 +155,10 @@ describe('resultado de la carrera', () => {
         'Todo el detalle en <a href="https://example.test/carreras/2026/21">la web</a>',
     )
   })
+  it('el tiempo de la vuelta rápida también se escapa', () => {
+    const data = { ...d, results: d.results.map((r) => (r.fastestLapRank === 1 ? { ...r, fastestLapTime: '<1>' } : r)) }
+    expect(raceResultMessage(data, 21, null)).toContain('Vuelta rápida: LAW, &lt;1&gt;')
+  })
   it('top 10 y vuelta rápida, aunque la haya hecho alguien de más atrás', () => {
     const m = raceResultMessage(d, 21, null)
     expect(m).toContain('</code></pre>\nVuelta rápida: LAW, 1:35.591\n\n🏆')

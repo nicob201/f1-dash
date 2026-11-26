@@ -45,6 +45,22 @@ it('entiende mayúsculas, @usuario y texto de más', () => {
 it('cualquier otra cosa devuelve la lista de comandos', () => {
   expect([reply('hola'), reply(''), reply('proxima'), reply('/stop')]).toEqual([HELP, HELP, HELP, HELP])
 })
+it('/campeonato usa la última ronda que tiene las dos tablas', () => {
+  const only = d.standings.filter((s) => s.kind === 'drivers').map((s) => ({ ...s, round: 22, points: s.points + 1 }))
+  const m = reply('/campeonato', { ...d, standings: [...d.standings, ...only] })
+  expect(m).toContain(' 1 ANT  402\n')
+  expect(m).not.toContain('></code>')
+})
+it('/campeonato sin ninguna ronda completa', () => {
+  const data = { ...d, standings: d.standings.filter((s) => s.kind === 'drivers') }
+  expect(reply('/campeonato', data)).toBe('Todavía no se corrió ninguna carrera.')
+})
+it('/start con el canal todavía cerrado', () => {
+  expect(commandReply('/start', d, NOW, { channel: null, webUrl: null })).toBe(
+    '¡Hola! Soy el bot de F1 Dash 🏎️\nEl canal con los avisos está por abrir.\n\n' +
+      '/proxima · próxima carrera\n/ultima · última carrera\n/campeonato · las dos tablas',
+  )
+})
 it('sin carreras corridas', () => {
   const empty = { ...d, results: [], standings: [] }
   expect(reply('/ultima', empty)).toBe('Todavía no se corrió ninguna carrera.')

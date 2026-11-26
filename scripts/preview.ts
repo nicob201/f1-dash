@@ -13,7 +13,7 @@ import * as messages from '../src/notices/messages'
 import { isPrivateChat, sendMessage } from '../src/telegram'
 
 const SEASON = 2026
-const LINKS = { channel: '@F1DashAr', webUrl: null }
+const LINKS = { channel: null, webUrl: null }
 
 const NOTICES: Record<NoticeType, (d: SeasonData, round: number) => string> = {
   preview: messages.previewMessage,

@@ -3,7 +3,8 @@ import { escapeHtml, gpName } from '../format/es'
 import { raceOf, type SeasonData } from './data'
 import { eventDetail, raceTop, standingsBlocks } from './messages'
 
-export type Links = { channel: string; webUrl: string | null }
+/** `channel: null` mientras el canal no esté abierto. */
+export type Links = { channel: string | null; webUrl: string | null }
 
 const COMMANDS = '/proxima · próxima carrera\n/ultima · última carrera\n/campeonato · las dos tablas'
 const NO_RACES = 'Todavía no se corrió ninguna carrera.'
@@ -13,7 +14,10 @@ const lastRound = (rows: { round: number }[]) => (rows.length ? Math.max(...rows
 
 function welcome({ channel, webUrl }: Links): string {
   const web = webUrl ? `\n\n<a href="${escapeHtml(webUrl)}">Ver la web</a>` : ''
-  return `¡Hola! Soy el bot de F1 Dash 🏎️\nLos avisos de cada fin de semana salen en el canal ${escapeHtml(channel)}.\n\n${COMMANDS}${web}`
+  const where = channel
+    ? `Los avisos de cada fin de semana salen en el canal ${escapeHtml(channel)}.`
+    : 'El canal con los avisos está por abrir.'
+  return `¡Hola! Soy el bot de F1 Dash 🏎️\n${where}\n\n${COMMANDS}${web}`
 }
 
 function next(d: SeasonData, now: Date): string {
@@ -30,7 +34,9 @@ function last(d: SeasonData): string {
 }
 
 function championship(d: SeasonData): string {
-  const round = lastRound(d.standings)
+  const has = (round: number, kind: 'drivers' | 'constructors') => d.standings.some((s) => s.round === round && s.kind === kind)
+  // Con una sola de las dos tablas, la otra saldría vacía.
+  const round = lastRound(d.standings.filter((s) => has(s.round, 'drivers') && has(s.round, 'constructors')))
   return round === null ? NO_RACES : standingsBlocks(d, round, false)
 }
 

@@ -90,7 +90,7 @@ export const sprintResultMessage = (d: SeasonData, round: number): string =>
 export function raceTop(d: SeasonData, round: number): string {
   const results = resultsOf(d, round, 'race')
   const fastest = results.find((r) => r.fastestLapRank === 1)
-  const lap = fastest?.fastestLapTime ? `\nVuelta rápida: ${escapeHtml(code(d, fastest.driverId))}, ${fastest.fastestLapTime}` : ''
+  const lap = fastest?.fastestLapTime ? `\nVuelta rápida: ${escapeHtml(code(d, fastest.driverId))}, ${escapeHtml(fastest.fastestLapTime)}` : ''
   return pre('Carrera', scoreRows(d, results.slice(0, 10))) + lap
 }
 
