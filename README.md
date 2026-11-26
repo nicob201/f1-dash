@@ -7,7 +7,7 @@ Proyecto de un fan. No es un sitio oficial de la Fórmula 1. Datos: Jolpica y Op
 - Diseño: `docs/2026-11-25-f1-dash-design.md`
 - Planes: `docs/superpowers/plans/`
 
-**Estado:** están la capa de datos, los textos de los avisos y del bot, y la lógica de qué aviso toca. Faltan el reloj, el webhook, la publicación en el canal y la web.
+**Estado:** el bot contesta `/proxima`, `/ultima` y `/campeonato` por privado. Faltan el reloj (descarga de datos y publicación en el canal) y la web. Mientras no esté el reloj, los datos se actualizan a mano con `npm run seed -- --remote`.
 
 ## Comandos
 
@@ -21,6 +21,7 @@ npm run seed -- --remote # en la base de Cloudflare (ver abajo)
 npm run avisos -- race-result 21  # muestra un mensaje armado con la base local
 npm run avisos -- --mi-chat       # id de tu chat privado con el bot
 npm run avisos -- race-result 21 --enviar  # te lo manda a ese chat
+npm run webhook -- https://…workers.dev    # conecta el bot con el Worker desplegado
 ```
 
 La base remota todavía no existe. Antes de usar `--remote` hay que crearla con `npx wrangler d1 create f1-dash`, poner su `database_id` en `wrangler.jsonc` y `wrangler.seed.jsonc`, y aplicar las migraciones con `--remote`.
