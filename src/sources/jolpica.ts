@@ -1,6 +1,7 @@
 // Traduce el JSON de Jolpica a nuestras filas. Si la forma no es la esperada, zod lanza.
 import { z } from 'zod'
-import type { RaceRow, SessionKind, SessionRow } from '../types'
+import { teamColor } from '../colors'
+import type { ConstructorRow, DriverRow, ParsedResults, RaceRow, ResultKind, ResultRow, SessionKind, SessionRow } from '../types'
 
 // Jolpica manda los números como texto.
 const num = z.string().regex(/^\d+(\.\d+)?$/).transform(Number)
@@ -50,4 +51,103 @@ export function parseCalendar(body: unknown): { races: RaceRow[]; sessions: Sess
     add('race', r)
   }
   return { races, sessions }
+}
+
+const entry = z.object({
+  number: num,
+  position: num,
+  Driver: z.object({ driverId: z.string(), code: z.string(), givenName: z.string(), familyName: z.string() }),
+  Constructor: z.object({ constructorId: z.string(), name: z.string() }),
+})
+const finish = entry.extend({
+  positionText: z.string(),
+  points: num,
+  grid: num,
+  status: z.string(),
+  Time: z.object({ time: z.string() }).optional(),
+  FastestLap: z.object({ rank: num.optional(), Time: z.object({ time: z.string() }).optional() }).optional(),
+})
+const qualifying = entry.extend({ Q1: z.string().optional(), Q2: z.string().optional(), Q3: z.string().optional() })
+
+const raceTable = <T extends z.ZodType>(races: T) =>
+  z.object({ MRData: z.object({ RaceTable: z.object({ Races: z.array(races) }) }) })
+const head = z.object({ season: num, round: num })
+const raceResults = raceTable(head.extend({ Results: z.array(finish) }))
+const sprintResults = raceTable(head.extend({ SprintResults: z.array(finish) }))
+const qualifyingResults = raceTable(head.extend({ QualifyingResults: z.array(qualifying) }))
+
+const EMPTY = {
+  positionText: null, grid: null, points: null, status: null, time: null,
+  q1: null, q2: null, q3: null, fastestLapRank: null, fastestLapTime: null,
+}
+
+/** Sin repetidos; gana el último, que es el de la ronda o página posterior. */
+const unique = <T>(rows: T[], id: (row: T) => string): T[] => [...new Map(rows.map((r) => [id(r), r])).values()]
+
+export function mergeResults(pages: ParsedResults[]): ParsedResults {
+  return {
+    drivers: unique(pages.flatMap((p) => p.drivers), (d) => `${d.season} ${d.driverId}`),
+    constructors: unique(pages.flatMap((p) => p.constructors), (c) => `${c.season} ${c.constructorId}`),
+    results: pages.flatMap((p) => p.results),
+  }
+}
+
+function toRows<E extends z.infer<typeof entry>>(
+  races: { season: number; round: number; entries: E[] }[],
+  kind: ResultKind,
+  extra: (e: E) => Partial<ResultRow>,
+): ParsedResults {
+  return mergeResults(
+    races.map(({ season, round, entries }) => ({
+      drivers: entries.map((e): DriverRow => ({
+        season,
+        driverId: e.Driver.driverId,
+        code: e.Driver.code,
+        carNumber: e.number, // el del auto en esa carrera, no Driver.permanentNumber
+        givenName: e.Driver.givenName,
+        familyName: e.Driver.familyName,
+        constructorId: e.Constructor.constructorId,
+      })),
+      constructors: entries.map((e): ConstructorRow => ({
+        season,
+        constructorId: e.Constructor.constructorId,
+        name: e.Constructor.name,
+        color: teamColor(e.Constructor.constructorId),
+      })),
+      results: entries.map((e): ResultRow => ({
+        ...EMPTY,
+        season,
+        round,
+        kind,
+        driverId: e.Driver.driverId,
+        constructorId: e.Constructor.constructorId,
+        carNumber: e.number,
+        position: e.position,
+        ...extra(e),
+      })),
+    })),
+  )
+}
+
+const fromFinish = (e: z.infer<typeof finish>): Partial<ResultRow> => ({
+  positionText: e.positionText,
+  grid: e.grid,
+  points: e.points,
+  status: e.status,
+  time: e.Time?.time ?? null,
+  fastestLapRank: e.FastestLap?.rank ?? null,
+  fastestLapTime: e.FastestLap?.Time?.time ?? null,
+})
+
+export function parseResults(body: unknown, kind: 'race' | 'sprint'): ParsedResults {
+  const races =
+    kind === 'race'
+      ? raceResults.parse(body).MRData.RaceTable.Races.map((r) => ({ ...r, entries: r.Results }))
+      : sprintResults.parse(body).MRData.RaceTable.Races.map((r) => ({ ...r, entries: r.SprintResults }))
+  return toRows(races, kind, fromFinish)
+}
+
+export function parseQualifying(body: unknown): ParsedResults {
+  const races = qualifyingResults.parse(body).MRData.RaceTable.Races.map((r) => ({ ...r, entries: r.QualifyingResults }))
+  return toRows(races, 'quali', (e) => ({ q1: e.Q1 ?? null, q2: e.Q2 ?? null, q3: e.Q3 ?? null }))
 }
