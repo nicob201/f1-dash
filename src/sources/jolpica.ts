@@ -5,6 +5,9 @@ import type { ConstructorRow, DriverRow, ParsedResults, PitStopRow, RaceRow, Res
 
 // Jolpica manda los números como texto.
 const num = z.string().regex(/^\d+(\.\d+)?$/).transform(Number)
+// Un tiempo que no hubo puede faltar o venir como "".
+const optionalText = z.string().optional().transform((v) => v || null)
+const timed = z.object({ time: optionalText })
 const when = z.object({ date: z.iso.date(), time: z.string() })
 // iso.datetime exige la zona: sin ella, la hora se leería en la zona de la máquina.
 const utc = (w: z.infer<typeof when>) => new Date(z.iso.datetime().parse(`${w.date}T${w.time}`))
@@ -65,10 +68,10 @@ const finish = entry.extend({
   points: num,
   grid: num,
   status: z.string(),
-  Time: z.object({ time: z.string() }).optional(),
-  FastestLap: z.object({ rank: num.optional(), Time: z.object({ time: z.string() }).optional() }).optional(),
+  Time: timed.optional(),
+  FastestLap: z.object({ rank: num.optional(), Time: timed.optional() }).optional(),
 })
-const qualifying = entry.extend({ Q1: z.string().optional(), Q2: z.string().optional(), Q3: z.string().optional() })
+const qualifying = entry.extend({ Q1: optionalText, Q2: optionalText, Q3: optionalText })
 
 const raceTable = <T extends z.ZodType>(races: T) =>
   z.object({ MRData: z.object({ RaceTable: z.object({ Races: z.array(races) }) }) })
@@ -150,7 +153,7 @@ export function parseResults(body: unknown, kind: 'race' | 'sprint'): ParsedResu
 
 export function parseQualifying(body: unknown): ParsedResults {
   const races = qualifyingResults.parse(body).MRData.RaceTable.Races.map((r) => ({ ...r, entries: r.QualifyingResults }))
-  return toRows(races, 'quali', (e) => ({ q1: e.Q1 ?? null, q2: e.Q2 ?? null, q3: e.Q3 ?? null }))
+  return toRows(races, 'quali', (e) => ({ q1: e.Q1, q2: e.Q2, q3: e.Q3 }))
 }
 
 // Sin puesto (positionText "-") Jolpica no manda position.
@@ -182,12 +185,12 @@ export function parseStandings(body: unknown, kind: StandingRow['kind']): Standi
 
 const pitStops = raceTable(
   head.extend({
-    PitStops: z.array(z.object({ driverId: z.string(), stop: num, lap: num, duration: z.string().optional() })),
+    PitStops: z.array(z.object({ driverId: z.string(), stop: num, lap: num, duration: optionalText })),
   }),
 )
 
 export function parsePitStops(body: unknown): PitStopRow[] {
   return pitStops.parse(body).MRData.RaceTable.Races.flatMap(({ season, round, PitStops }) =>
-    PitStops.map((p) => ({ season, round, driverId: p.driverId, stop: p.stop, lap: p.lap, duration: p.duration ?? null })),
+    PitStops.map((p) => ({ season, round, driverId: p.driverId, stop: p.stop, lap: p.lap, duration: p.duration })),
   )
 }

@@ -4,6 +4,7 @@ import drivers1 from './__fixtures__/driverstandings-2026-1.json'
 import drivers21 from './__fixtures__/driverstandings-2026-21.json'
 import pits17 from './__fixtures__/pitstops-2026-17.json'
 import quali21 from './__fixtures__/qualifying-2026-21.json'
+import quali4 from './__fixtures__/qualifying-2026-4.json'
 import results21 from './__fixtures__/results-2026-21.json'
 import sprint17 from './__fixtures__/sprint-2026-17.json'
 import { mergeResults, parseCalendar, parsePitStops, parseQualifying, parseResults, parseStandings } from './jolpica'
@@ -59,6 +60,20 @@ describe('resultados', () => {
     expect(q[0]).toMatchObject({ kind: 'quali', position: 1, carNumber: 12 })
     expect(q[0]!.q3).not.toBeNull()
     expect(q[21]).toMatchObject({ position: 22, carNumber: 87, q1: '1:48.005', q2: null, q3: null })
+  })
+  it('un tiempo vacío es que no hubo tiempo', () => {
+    const q = parseQualifying(quali4).results
+    const at = (n: number) => q.find((r) => r.position === n)!
+    expect(at(10)).toMatchObject({ q1: '1:29.645', q2: '1:29.439', q3: null })
+    expect(at(16)).toMatchObject({ q1: '1:30.133', q2: null, q3: null })
+    expect(at(22)).toMatchObject({ q1: null, q2: null, q3: null })
+  })
+  it('un tiempo de carrera o de vuelta vacío queda en null', () => {
+    const copy = structuredClone(results21)
+    const first = copy.MRData.RaceTable.Races[0]!.Results[0]!
+    first.Time!.time = ''
+    first.FastestLap!.Time.time = ''
+    expect(parseResults(copy, 'race').results[0]).toMatchObject({ time: null, fastestLapTime: null })
   })
   it('sin resultados todavía', () => {
     expect(parseResults({ MRData: { RaceTable: { Races: [] } } }, 'race').results).toEqual([])

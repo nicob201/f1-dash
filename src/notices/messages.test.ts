@@ -1,6 +1,7 @@
+import quali4 from '../sources/__fixtures__/qualifying-2026-4.json'
 import sprint17 from '../sources/__fixtures__/sprint-2026-17.json'
 import of1Result from '../sources/__fixtures__/of1-result-11379.json'
-import { mergeResults, parseResults } from '../sources/jolpica'
+import { mergeResults, parseQualifying, parseResults } from '../sources/jolpica'
 import { parseSessionResult, sprintQualiRows } from '../sources/openf1'
 import type { GridRow, StandingRow } from '../types'
 import { season2026 } from './__fixtures__/season'
@@ -64,6 +65,13 @@ describe('clasificación', () => {
     const lines = pre(qualiMessage(d, 21, 'quali'))
     expect(lines).toHaveLength(22)
     expect(lines[21]).toBe('22 BEA  Haas          1:48.005')
+  })
+  it('datos reales de Miami: quien no marcó en su última tanda muestra el anterior, y sin ninguno, raya', () => {
+    const q = parseQualifying(quali4)
+    const lines = pre(qualiMessage({ ...d, ...q }, 4, 'quali'))
+    expect(lines[9]).toBe('10 HUL  Audi          1:29.439')
+    expect(lines[15]).toMatch(/^16 LIN .+ 1:30\.133$/)
+    expect(lines[21]).toMatch(/^22 HAD .+ —$/)
   })
   it('sprint: sin puesto va al final y sin tiempo lleva raya', () => {
     const data = withSprint17()
