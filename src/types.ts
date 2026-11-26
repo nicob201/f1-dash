@@ -21,3 +21,7 @@ export type StandingRow = {
   entityId: string; position: number; points: number; wins: number
 }
 export type PitStopRow = { season: number; round: number; driverId: string; stop: number; lap: number; duration: string | null }
+export type GridRow = {
+  season: number; round: number; kind: 'race' | 'sprint'
+  carNumber: number; position: number; source: 'openf1' | 'quali'
+}
