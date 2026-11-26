@@ -7,7 +7,7 @@ Proyecto de un fan. No es un sitio oficial de la Fórmula 1. Datos: Jolpica y Op
 - Diseño: `docs/2026-11-25-f1-dash-design.md`
 - Planes: `docs/superpowers/plans/`
 
-**Estado:** está la capa de datos (parsers, base y carga inicial). Faltan el reloj, el canal, el bot y la web.
+**Estado:** están la capa de datos, los textos de los avisos y del bot, y la lógica de qué aviso toca. Faltan el reloj, el webhook, la publicación en el canal y la web.
 
 ## Comandos
 
@@ -18,6 +18,7 @@ npm run typecheck
 npx wrangler d1 migrations apply f1-dash --local
 npm run seed             # carga la temporada 2026 en la base local (tarda unos minutos)
 npm run seed -- --remote # en la base de Cloudflare (ver abajo)
+npm run avisos -- race-result 21  # muestra un mensaje armado con la base local
 ```
 
 La base remota todavía no existe. Antes de usar `--remote` hay que crearla con `npx wrangler d1 create f1-dash`, poner su `database_id` en `wrangler.jsonc` y `wrangler.seed.jsonc`, y aplicar las migraciones con `--remote`.

@@ -140,9 +140,16 @@ describe('resultado de la carrera', () => {
     expect(raceResultMessage(d, 21, null)).not.toContain('+')
     const prev = [standing(20, 'drivers', 'max_verstappen', 279, 2), standing(20, 'drivers', 'antonelli', 402, 1)]
     const lines = pre(raceResultMessage({ ...d, standings: [...d.standings, ...prev] }, 21, null))
-    expect(lines).toContain(' 2 VER  304   +25')
+    expect(lines).toContain(' 2 VER  304  +25')
+    expect(lines).toContain(' 4 RUS  264  +264')
     expect(lines).toContain(' 1 ANT  402')
     expect(lines).toContain(' 3 HAM  267  +267') // no estaba en la tabla anterior: sumó todo ahora
+  })
+  it('los +N quedan alineados como en el ejemplo aprobado', () => {
+    const prev = [standing(20, 'drivers', 'antonelli', 390, 1), standing(20, 'drivers', 'hamilton', 261, 3)]
+    const lines = pre(raceResultMessage({ ...d, standings: [...d.standings, ...prev] }, 21, null))
+    expect(lines).toContain(' 1 ANT  402  +12')
+    expect(lines).toContain(' 3 HAM  267   +6')
   })
   it('la línea de campeón aparece solo en la fecha que define', () => {
     expect(raceResultMessage(d, 21, null)).not.toContain('👑')

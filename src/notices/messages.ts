@@ -84,7 +84,7 @@ export function standingsBlocks(d: SeasonData, round: number, withGains: boolean
     // Sin la tabla anterior no se sabe cuánto sumó en la fecha.
     if (!withGains || (round > 1 && previous.length === 0)) return ''
     const points = s.points - (previous.find((p) => p.entityId === s.entityId)?.points ?? 0)
-    return points > 0 ? `  ${`+${points}`.padStart(4)}` : ''
+    return points > 0 ? `  ${`+${points}`.padStart(3)}` : ''
   }
   const drivers = standingsOf(d, round, 'drivers')
     .slice(0, 10)
