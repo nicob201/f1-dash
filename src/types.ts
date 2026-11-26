@@ -16,3 +16,8 @@ export type ResultRow = {
   fastestLapRank: number | null; fastestLapTime: string | null
 }
 export type ParsedResults = { drivers: DriverRow[]; constructors: ConstructorRow[]; results: ResultRow[] }
+export type StandingRow = {
+  season: number; round: number; kind: 'drivers' | 'constructors'
+  entityId: string; position: number; points: number; wins: number
+}
+export type PitStopRow = { season: number; round: number; driverId: string; stop: number; lap: number; duration: string | null }

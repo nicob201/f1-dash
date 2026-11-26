@@ -1,8 +1,11 @@
 import calendar from './__fixtures__/calendar-2026.json'
+import constructors21 from './__fixtures__/constructorstandings-2026-21.json'
+import drivers21 from './__fixtures__/driverstandings-2026-21.json'
+import pits17 from './__fixtures__/pitstops-2026-17.json'
 import quali21 from './__fixtures__/qualifying-2026-21.json'
 import results21 from './__fixtures__/results-2026-21.json'
 import sprint17 from './__fixtures__/sprint-2026-17.json'
-import { mergeResults, parseCalendar, parseQualifying, parseResults } from './jolpica'
+import { mergeResults, parseCalendar, parsePitStops, parseQualifying, parseResults, parseStandings } from './jolpica'
 
 describe('parseCalendar', () => {
   const { races, sessions } = parseCalendar(calendar)
@@ -73,5 +76,31 @@ describe('resultados', () => {
   it('cada equipo de 2026 tiene color propio', () => {
     expect(race.constructors).toHaveLength(11)
     for (const c of race.constructors) expect(c.color).not.toBe('#9C9CB0')
+  })
+})
+
+describe('tablas y paradas', () => {
+  it('pilotos', () => {
+    const s = parseStandings(drivers21, 'drivers')
+    expect(s).toHaveLength(25)
+    expect(s[0]).toEqual({ season: 2026, round: 21, kind: 'drivers', entityId: 'antonelli', position: 1, points: 402, wins: 9 })
+    expect(s[1]).toMatchObject({ entityId: 'max_verstappen', points: 304 })
+  })
+  it('constructores', () => {
+    const s = parseStandings(constructors21, 'constructors')
+    expect(s).toHaveLength(11)
+    expect(s[0]).toMatchObject({ entityId: 'mercedes', points: 666, wins: 12 })
+  })
+  it('paradas', () => {
+    const p = parsePitStops(pits17)
+    expect(p).toHaveLength(25)
+    expect(p[0]).toEqual({ season: 2026, round: 17, driverId: 'hamilton', stop: 1, lap: 18, duration: '24.048' })
+  })
+  it('todavía sin publicar', () => {
+    expect(parseStandings({ MRData: { StandingsTable: { StandingsLists: [] } } }, 'drivers')).toEqual([])
+    expect(parsePitStops({ MRData: { RaceTable: { Races: [] } } })).toEqual([])
+  })
+  it('la tabla equivocada lanza', () => {
+    expect(() => parseStandings(drivers21, 'constructors')).toThrow()
   })
 })

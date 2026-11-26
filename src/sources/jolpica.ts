@@ -1,7 +1,7 @@
 // Traduce el JSON de Jolpica a nuestras filas. Si la forma no es la esperada, zod lanza.
 import { z } from 'zod'
 import { teamColor } from '../colors'
-import type { ConstructorRow, DriverRow, ParsedResults, RaceRow, ResultKind, ResultRow, SessionKind, SessionRow } from '../types'
+import type { ConstructorRow, DriverRow, ParsedResults, PitStopRow, RaceRow, ResultKind, ResultRow, SessionKind, SessionRow, StandingRow } from '../types'
 
 // Jolpica manda los números como texto.
 const num = z.string().regex(/^\d+(\.\d+)?$/).transform(Number)
@@ -150,4 +150,42 @@ export function parseResults(body: unknown, kind: 'race' | 'sprint'): ParsedResu
 export function parseQualifying(body: unknown): ParsedResults {
   const races = qualifyingResults.parse(body).MRData.RaceTable.Races.map((r) => ({ ...r, entries: r.QualifyingResults }))
   return toRows(races, 'quali', (e) => ({ q1: e.Q1 ?? null, q2: e.Q2 ?? null, q3: e.Q3 ?? null }))
+}
+
+const standing = z.object({ position: num, points: num, wins: num })
+const standingsTable = <T extends z.ZodType>(list: T) =>
+  z.object({ MRData: z.object({ StandingsTable: z.object({ StandingsLists: z.array(list) }) }) })
+const driverStandings = standingsTable(
+  head.extend({ DriverStandings: z.array(standing.extend({ Driver: z.object({ driverId: z.string() }) })) }),
+)
+const constructorStandings = standingsTable(
+  head.extend({ ConstructorStandings: z.array(standing.extend({ Constructor: z.object({ constructorId: z.string() }) })) }),
+)
+
+export function parseStandings(body: unknown, kind: StandingRow['kind']): StandingRow[] {
+  const lists =
+    kind === 'drivers'
+      ? driverStandings.parse(body).MRData.StandingsTable.StandingsLists.map((l) => ({
+          ...l,
+          entries: l.DriverStandings.map((e) => ({ ...e, entityId: e.Driver.driverId })),
+        }))
+      : constructorStandings.parse(body).MRData.StandingsTable.StandingsLists.map((l) => ({
+          ...l,
+          entries: l.ConstructorStandings.map((e) => ({ ...e, entityId: e.Constructor.constructorId })),
+        }))
+  return lists.flatMap(({ season, round, entries }) =>
+    entries.map(({ entityId, position, points, wins }) => ({ season, round, kind, entityId, position, points, wins })),
+  )
+}
+
+const pitStops = raceTable(
+  head.extend({
+    PitStops: z.array(z.object({ driverId: z.string(), stop: num, lap: num, duration: z.string().optional() })),
+  }),
+)
+
+export function parsePitStops(body: unknown): PitStopRow[] {
+  return pitStops.parse(body).MRData.RaceTable.Races.flatMap(({ season, round, PitStops }) =>
+    PitStops.map((p) => ({ season, round, driverId: p.driverId, stop: p.stop, lap: p.lap, duration: p.duration ?? null })),
+  )
 }
