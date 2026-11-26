@@ -1,0 +1,7 @@
+node_modules/
+.env
+.dev.vars
+.wrangler/
+.superpowers/
+medicion/
+.DS_Store

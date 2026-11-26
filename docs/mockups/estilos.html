@@ -1,0 +1,292 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;700&family=Chivo+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600&display=swap">
+
+<style>
+  .dirs { grid-template-columns: 1fr; gap: 2.5rem; }
+  .dirs .dir { background: transparent; border: 2px solid transparent; border-radius: 14px; padding: 0; cursor: pointer; }
+  .dirs .dir:hover { transform: none; box-shadow: none; border-color: var(--border); }
+  .dirs .dir.selected { border-color: var(--selected-border); }
+  .dir-head { padding: 0.75rem 0.25rem 0.9rem; }
+  .dir-head h3 { font-size: 1.15rem; }
+  .dir-head p { color: var(--text-secondary); font-size: 0.9rem; max-width: 70ch; }
+  .dir ol { list-style: none; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* ================= A. PIT WALL ================= */
+  .pw { --bg:#15151E; --panel:#22222E; --line:#2D2D3B; --ink:#F3F3F7; --mute:#9C9CB0; --red:#EE2B3B;
+        background: var(--bg); color: var(--ink); font-family: 'Archivo', sans-serif; border-radius: 10px; overflow: hidden; }
+  .pw-top { display: flex; align-items: center; gap: 2rem; padding: 14px 24px; border-bottom: 3px solid var(--red); }
+  .pw-logo { font-weight: 900; font-stretch: 72%; font-style: italic; font-size: 22px; }
+  .pw-top nav { display: flex; gap: 22px; font-size: 14px; color: var(--mute); }
+  .pw-top nav span:first-child { color: var(--ink); font-weight: 700; }
+  .pw-tg { margin-left: auto; font-size: 13px; font-weight: 700; padding: 8px 18px; background: var(--red);
+           clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
+  .pw-grid { display: grid; grid-template-columns: 1.15fr 1fr 0.9fr; gap: 1px; background: var(--line); }
+  .pw-grid > section { background: var(--bg); padding: 22px 24px 24px; }
+  .pw-k { font-size: 13px; color: var(--mute); margin-bottom: 6px; }
+  .pw-gp { font-size: 60px; line-height: .88; font-weight: 900; font-stretch: 62%; font-style: italic; margin-bottom: 6px; }
+  .pw-circ { font-size: 14px; color: var(--mute); }
+  .pw-count { display: flex; align-items: baseline; gap: 5px; margin: 18px 0 14px; }
+  .pw-count b { font-size: 42px; font-weight: 800; font-stretch: 70%; font-variant-numeric: tabular-nums; line-height: 1; }
+  .pw-count small { font-size: 12px; color: var(--mute); margin-right: 12px; }
+  .pw-sched { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .pw-sched td { padding: 7px 0; border-top: 1px solid var(--line); color: var(--mute); }
+  .pw-sched td:nth-child(2) { color: var(--ink); }
+  .pw-sched td:last-child { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); }
+  .pw-sched tr.race td { font-weight: 800; color: var(--ink); }
+  .pw-sched tr.race td:first-child { box-shadow: inset 3px 0 0 var(--red); padding-left: 10px; }
+  .pw-title { font-size: 30px; font-weight: 900; font-stretch: 65%; font-style: italic; margin-bottom: 10px; line-height: 1; }
+  .pw-tower li { display: grid; grid-template-columns: 30px 5px 46px 1fr auto; align-items: center; gap: 10px;
+                 padding: 7px 0; border-top: 1px solid var(--line); }
+  .pw-pos { height: 24px; display: grid; place-items: center; background: var(--panel); font-weight: 800; font-size: 14px;
+            clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%); }
+  .pw-tower li:first-child .pw-pos { background: var(--ink); color: var(--bg); }
+  .pw-st { width: 5px; height: 20px; background: var(--team); transform: skewX(-14deg); }
+  .pw-code { font-weight: 800; font-stretch: 75%; font-size: 18px; letter-spacing: .02em; }
+  .pw-name { font-size: 13px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pw-gap { font-size: 14px; font-variant-numeric: tabular-nums; }
+  .pw-pts { font-size: 18px; font-weight: 800; font-stretch: 75%; font-variant-numeric: tabular-nums; }
+  .pw-fl { margin-top: 12px; font-size: 13px; color: var(--mute); }
+  .pw-fl b { color: #B455FF; font-weight: 700; }
+  .pw-champ .pw-k + .pw-tower { margin-bottom: 18px; }
+
+  /* ================= B. TELEMETRÍA ================= */
+  .tl { --bg:#000; --line:#1C2620; --ink:#E4EEE7; --mute:#6F8478; --purple:#B455FF; --green:#30D36F; --yellow:#FFD23F;
+        background: var(--bg); color: var(--ink); font-family: 'Chivo', sans-serif; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .tl-mono, .tl-clock, .tl-table td, .tl-bars .v { font-family: 'Chivo Mono', monospace; }
+  .tl-top { display: flex; align-items: center; gap: 1.5rem; padding: 12px 20px; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .tl-logo { font-family: 'Chivo Mono', monospace; font-weight: 600; font-size: 15px; }
+  .tl-live { color: var(--mute); }
+  .tl-tg { margin-left: auto; border: 1px solid var(--yellow); color: var(--yellow); padding: 6px 12px; }
+  .tl-grid { display: grid; grid-template-columns: 1fr 1.25fr 1fr; }
+  .tl-grid > section { padding: 20px; border-right: 1px solid var(--line); }
+  .tl-grid > section:last-child { border-right: 0; }
+  .tl-h { font-size: 13px; color: var(--mute); margin-bottom: 12px; }
+  .tl-h b { color: var(--ink); font-weight: 700; }
+  .tl-clock { display: flex; align-items: flex-start; gap: 4px; margin-bottom: 22px; color: var(--yellow); }
+  .tl-clock b { display: block; font-size: 58px; line-height: 1; font-weight: 600; letter-spacing: -.02em; }
+  .tl-clock small { display: block; font-family: 'Chivo', sans-serif; font-size: 11px; color: var(--mute); margin-top: 6px; }
+  .tl-clock .sep { font-size: 58px; line-height: 1; opacity: .5; }
+  .tl-sess li { display: grid; grid-template-columns: 70px 1fr auto; padding: 7px 0; border-top: 1px solid var(--line); font-size: 13px; }
+  .tl-sess li .d { color: var(--mute); }
+  .tl-sess li .t { font-family: 'Chivo Mono', monospace; }
+  .tl-sess li.race { color: var(--yellow); font-weight: 700; }
+  .tl-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .tl-table th { text-align: left; font-weight: 400; color: var(--mute); font-size: 12px; padding: 0 0 8px; }
+  .tl-table td { padding: 6px 0; border-top: 1px solid var(--line); }
+  .tl-table td.drv { font-family: 'Chivo', sans-serif; font-weight: 700; }
+  .tl-table td.drv i { display: inline-block; width: 3px; height: 12px; background: var(--team); margin-right: 8px; vertical-align: -1px; }
+  .tl-table .r { text-align: right; }
+  .tl-table .pb { color: var(--green); }
+  .tl-table .fl { color: var(--purple); }
+  .tl-legend { display: flex; gap: 14px; margin-top: 12px; font-size: 12px; color: var(--mute); }
+  .tl-legend i { display: inline-block; width: 8px; height: 8px; margin-right: 6px; }
+  .tl-bars { position: relative; }
+  .tl-bars li { display: grid; grid-template-columns: 38px 1fr 62px; align-items: center; gap: 10px; padding: 7px 0; font-size: 13px; }
+  .tl-bars .bar { height: 8px; background: #121a15; position: relative; }
+  .tl-bars .bar i { position: absolute; inset: 0 auto 0 0; background: var(--team); }
+  .tl-bars .v { text-align: right; }
+  .tl-bars .v small { color: var(--mute); }
+  .tl-cut { position: absolute; top: -8px; bottom: -8px; left: 85%; border-left: 1px dashed var(--yellow); }
+  .tl-legend .fl { color: var(--purple); font-family: 'Chivo Mono', monospace; }
+  .tl-note { margin-top: 14px; font-size: 12px; color: var(--mute); line-height: 1.5; }
+  .tl-note b { color: var(--yellow); font-weight: 400; }
+
+  /* ================= C. EDITORIAL ================= */
+  .ed { --bg:#0F1117; --ink:#F4F2EC; --mute:#989DAA; --line:#272B36; --win:#3671C6;
+        background: var(--bg); color: var(--ink); font-family: 'Instrument Sans', sans-serif; border-radius: 10px; overflow: hidden; }
+  .ed-top { display: flex; align-items: center; gap: 2rem; padding: 16px 32px; }
+  .ed-logo { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 26px; letter-spacing: .01em; }
+  .ed-top nav { display: flex; gap: 22px; font-size: 14px; color: var(--mute); }
+  .ed-tg { margin-left: auto; font-size: 14px; font-weight: 600; border-bottom: 2px solid var(--ink); padding-bottom: 2px; }
+  .ed-hero { background: var(--win); padding: 30px 32px 0; display: grid; grid-template-columns: 1.1fr 1fr; gap: 32px; align-items: end; }
+  .ed-k { font-size: 14px; opacity: .8; margin-bottom: 10px; }
+  .ed-h { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 64px; line-height: .92; letter-spacing: -.005em; padding-bottom: 30px; max-width: 14ch; }
+  .ed-podium { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: end; gap: 6px; }
+  .ed-podium div { background: rgba(0,0,0,.22); padding: 12px 14px 14px; }
+  .ed-podium .p1 { padding-top: 26px; background: rgba(0,0,0,.34); }
+  .ed-podium b { display: block; font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 84px; line-height: .8; opacity: .95; }
+  .ed-podium .p2 b, .ed-podium .p3 b { font-size: 60px; opacity: .7; }
+  .ed-podium span { display: block; font-weight: 600; font-size: 15px; margin-top: 10px; }
+  .ed-podium small { font-size: 13px; opacity: .75; }
+  .ed-body { display: grid; grid-template-columns: 1.1fr 1fr; gap: 32px; padding: 26px 32px 30px; }
+  .ed-next { border-left: 3px solid var(--ink); padding-left: 18px; }
+  .ed-next h5 { font-family: 'Big Shoulders Display', sans-serif; font-weight: 700; font-size: 34px; line-height: 1; margin: 2px 0 8px; }
+  .ed-next p { color: var(--mute); font-size: 15px; line-height: 1.5; max-width: 46ch; }
+  .ed-next p b { color: var(--ink); font-weight: 600; }
+  .ed-race h5 { font-family: 'Big Shoulders Display', sans-serif; font-weight: 700; font-size: 26px; margin-bottom: 4px; }
+  .ed-race > p { color: var(--mute); font-size: 14px; margin-bottom: 12px; max-width: 52ch; }
+  .ed-race li { display: grid; grid-template-columns: 1fr auto 56px; gap: 12px; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--line); font-size: 15px; }
+  .ed-race li span:first-child { font-weight: 600; }
+  .ed-race li i { font-style: normal; width: 8px; height: 8px; border-radius: 50%; background: var(--team); display: inline-block; margin-right: 10px; }
+  .ed-race li .gap { color: var(--mute); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .ed-race li .pts { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+
+  @media (max-width: 980px) {
+    .pw-grid, .tl-grid, .ed-hero, .ed-body { grid-template-columns: 1fr; }
+    .tl-grid > section { border-right: 0; border-bottom: 1px solid var(--line); }
+    .pw-top nav, .ed-top nav { display: none; }
+  }
+</style>
+
+<h2>¿Qué estilo te gusta para el panel?</h2>
+<p class="subtitle">Los tres muestran lo mismo: la próxima carrera, la última y el campeonato. Los datos son de ejemplo y "Parque Cerrado" es un nombre de trabajo. Hacé clic en el que más te guste; en tu respuesta podés mezclar cosas de varios.</p>
+
+<div class="cards dirs">
+
+  <!-- ===================== A ===================== -->
+  <div class="card dir" data-choice="pit-wall" onclick="toggleSelect(this)">
+    <div class="dir-head">
+      <h3>A. Pit wall</h3>
+      <p>Lo más cercano a la app oficial: fondo carbono, acento rojo, tipografía condensada en itálica y cada piloto con la franja de su equipo, como la torre de tiempos de la tele.</p>
+    </div>
+    <div class="pw">
+      <header class="pw-top">
+        <span class="pw-logo">Parque Cerrado</span>
+        <nav><span>Inicio</span><span>Carreras</span><span>Campeonato</span><span>Stats</span></nav>
+        <span class="pw-tg">Recibí los avisos en Telegram</span>
+      </header>
+      <div class="pw-grid">
+        <section>
+          <p class="pw-k">Próxima carrera, ronda 23 de 24</p>
+          <h4 class="pw-gp">GP de Qatar</h4>
+          <p class="pw-circ">Circuito Internacional de Lusail</p>
+          <div class="pw-count"><b>3</b><small>días</small><b>21</b><small>horas</small><b>14</b><small>min</small></div>
+          <table class="pw-sched">
+            <tr><td>Vie 27</td><td>Práctica libre 1</td><td>10:30</td></tr>
+            <tr><td>Vie 27</td><td>Práctica libre 2</td><td>14:00</td></tr>
+            <tr><td>Sáb 28</td><td>Práctica libre 3</td><td>11:30</td></tr>
+            <tr><td>Sáb 28</td><td>Clasificación</td><td>15:00</td></tr>
+            <tr class="race"><td>Dom 29</td><td>Carrera</td><td>13:00</td></tr>
+          </table>
+        </section>
+        <section>
+          <p class="pw-k">Última carrera</p>
+          <h4 class="pw-title">GP de Las Vegas</h4>
+          <ol class="pw-tower">
+            <li style="--team:#3671C6"><span class="pw-pos">1</span><span class="pw-st"></span><span class="pw-code">VER</span><span class="pw-name">Max Verstappen</span><span class="pw-gap">1:21:14.894</span></li>
+            <li style="--team:#FF8000"><span class="pw-pos">2</span><span class="pw-st"></span><span class="pw-code">NOR</span><span class="pw-name">Lando Norris</span><span class="pw-gap">+2.385</span></li>
+            <li style="--team:#E8002D"><span class="pw-pos">3</span><span class="pw-st"></span><span class="pw-code">LEC</span><span class="pw-name">Charles Leclerc</span><span class="pw-gap">+7.912</span></li>
+            <li style="--team:#FF8000"><span class="pw-pos">4</span><span class="pw-st"></span><span class="pw-code">PIA</span><span class="pw-name">Oscar Piastri</span><span class="pw-gap">+9.140</span></li>
+            <li style="--team:#27F4D2"><span class="pw-pos">5</span><span class="pw-st"></span><span class="pw-code">RUS</span><span class="pw-name">George Russell</span><span class="pw-gap">+12.007</span></li>
+          </ol>
+          <p class="pw-fl">Vuelta rápida: <b>Piastri, 1:34.876</b></p>
+        </section>
+        <section class="pw-champ">
+          <p class="pw-k">Campeonato de pilotos</p>
+          <ol class="pw-tower">
+            <li style="--team:#FF8000"><span class="pw-pos">1</span><span class="pw-st"></span><span class="pw-code">NOR</span><span></span><span class="pw-pts">390</span></li>
+            <li style="--team:#FF8000"><span class="pw-pos">2</span><span class="pw-st"></span><span class="pw-code">PIA</span><span></span><span class="pw-pts">366</span></li>
+            <li style="--team:#3671C6"><span class="pw-pos">3</span><span class="pw-st"></span><span class="pw-code">VER</span><span></span><span class="pw-pts">341</span></li>
+            <li style="--team:#27F4D2"><span class="pw-pos">4</span><span class="pw-st"></span><span class="pw-code">RUS</span><span></span><span class="pw-pts">278</span></li>
+          </ol>
+          <p class="pw-k">Constructores</p>
+          <ol class="pw-tower">
+            <li style="--team:#FF8000"><span class="pw-pos">1</span><span class="pw-st"></span><span class="pw-code">MCL</span><span></span><span class="pw-pts">756</span></li>
+            <li style="--team:#27F4D2"><span class="pw-pos">2</span><span class="pw-st"></span><span class="pw-code">MER</span><span></span><span class="pw-pts">431</span></li>
+            <li style="--team:#E8002D"><span class="pw-pos">3</span><span class="pw-st"></span><span class="pw-code">FER</span><span></span><span class="pw-pts">398</span></li>
+          </ol>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== B ===================== -->
+  <div class="card dir" data-choice="telemetria" onclick="toggleSelect(this)">
+    <div class="dir-head">
+      <h3>B. Telemetría</h3>
+      <p>Como los monitores de tiempos del muro de boxes: negro puro, números de ancho fijo y los colores que usa la F1 para los tiempos (violeta para la vuelta más rápida, verde para lo que mejora). Lo central es un reloj de cuenta regresiva.</p>
+    </div>
+    <div class="tl">
+      <header class="tl-top">
+        <span class="tl-logo">parque_cerrado</span>
+        <span class="tl-live">Temporada 2026, 22 de 24 carreras corridas</span>
+        <span class="tl-tg">Avisos en Telegram</span>
+      </header>
+      <div class="tl-grid">
+        <section>
+          <p class="tl-h">Largada del <b>GP de Qatar</b> en</p>
+          <div class="tl-clock"><span><b>03</b><small>días</small></span><span class="sep">:</span><span><b>21</b><small>horas</small></span><span class="sep">:</span><span><b>14</b><small>minutos</small></span></div>
+          <ol class="tl-sess">
+            <li><span class="d">Vie 27</span><span>Práctica libre 1</span><span class="t">10:30</span></li>
+            <li><span class="d">Vie 27</span><span>Práctica libre 2</span><span class="t">14:00</span></li>
+            <li><span class="d">Sáb 28</span><span>Práctica libre 3</span><span class="t">11:30</span></li>
+            <li><span class="d">Sáb 28</span><span>Clasificación</span><span class="t">15:00</span></li>
+            <li class="race"><span class="d">Dom 29</span><span>Carrera</span><span class="t">13:00</span></li>
+          </ol>
+        </section>
+        <section>
+          <p class="tl-h">Clasificación final, <b>GP de Las Vegas</b></p>
+          <table class="tl-table">
+            <tr><th>Pos</th><th>Piloto</th><th class="r">Tiempo</th><th class="r">Largó</th></tr>
+            <tr style="--team:#3671C6"><td>1</td><td class="drv"><i></i>VER</td><td class="r">1:21:14.894</td><td class="r pb">4 ▲3</td></tr>
+            <tr style="--team:#FF8000"><td>2</td><td class="drv"><i></i>NOR</td><td class="r">+2.385</td><td class="r">1 ▼1</td></tr>
+            <tr style="--team:#E8002D"><td>3</td><td class="drv"><i></i>LEC</td><td class="r">+7.912</td><td class="r">3 =</td></tr>
+            <tr style="--team:#FF8000"><td>4</td><td class="drv"><i></i>PIA</td><td class="r">+9.140</td><td class="r">2 ▼2</td></tr>
+            <tr style="--team:#27F4D2"><td>5</td><td class="drv"><i></i>RUS</td><td class="r">+12.007</td><td class="r pb">9 ▲4</td></tr>
+            <tr style="--team:#27F4D2"><td>6</td><td class="drv"><i></i>ANT</td><td class="r">+18.655</td><td class="r">5 ▼1</td></tr>
+          </table>
+          <div class="tl-legend"><span><i style="background:var(--purple)"></i>vuelta más rápida: <span class="fl">PIA 1:34.876</span></span><span><i style="background:var(--green)"></i>ganó posiciones</span></div>
+        </section>
+        <section>
+          <p class="tl-h">Campeonato de pilotos</p>
+          <ol class="tl-bars">
+            <li style="--team:#FF8000"><span>NOR</span><span class="bar"><i style="width:97.5%"></i><span class="tl-cut"></span></span><span class="v">390</span></li>
+            <li style="--team:#FF8000"><span>PIA</span><span class="bar"><i style="width:91.5%"></i><span class="tl-cut"></span></span><span class="v">366 <small>-24</small></span></li>
+            <li style="--team:#3671C6"><span>VER</span><span class="bar"><i style="width:85.25%"></i><span class="tl-cut"></span></span><span class="v">341 <small>-49</small></span></li>
+            <li style="--team:#27F4D2"><span>RUS</span><span class="bar"><i style="width:69.5%"></i><span class="tl-cut"></span></span><span class="v">278 <small>-112</small></span></li>
+            <li style="--team:#E8002D"><span>LEC</span><span class="bar"><i style="width:58%"></i><span class="tl-cut"></span></span><span class="v">232 <small>-158</small></span></li>
+          </ol>
+          <p class="tl-note">Quedan <b>50 puntos</b> en juego. La línea amarilla marca el corte: quien queda a su derecha todavía puede ser campeón.</p>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== C ===================== -->
+  <div class="card dir" data-choice="editorial" onclick="toggleSelect(this)">
+    <div class="dir-head">
+      <h3>C. Editorial</h3>
+      <p>Como la tapa de una revista deportiva: titular grande y podio protagonista. El color de arriba cambia con cada carrera y toma el del equipo ganador (acá, Red Bull). Menos tablas, más historia de la fecha.</p>
+    </div>
+    <div class="ed">
+      <header class="ed-top">
+        <span class="ed-logo">Parque Cerrado</span>
+        <nav><span>Carreras</span><span>Campeonato</span><span>Stats</span></nav>
+        <span class="ed-tg">Recibí los avisos en Telegram</span>
+      </header>
+      <div class="ed-hero">
+        <div>
+          <p class="ed-k">GP de Las Vegas, ronda 22</p>
+          <h4 class="ed-h">Verstappen gana en Las Vegas y el título queda abierto entre tres</h4>
+        </div>
+        <div class="ed-podium">
+          <div class="p2"><b>2</b><span>Norris</span><small>McLaren, +2.385</small></div>
+          <div class="p1"><b>1</b><span>Verstappen</span><small>Red Bull</small></div>
+          <div class="p3"><b>3</b><span>Leclerc</span><small>Ferrari, +7.912</small></div>
+        </div>
+      </div>
+      <div class="ed-body">
+        <div class="ed-next">
+          <p class="ed-k">Lo que viene</p>
+          <h5>GP de Qatar, domingo 29 a las 13:00</h5>
+          <p>Faltan <b>3 días y 21 horas</b>. La clasificación es el sábado a las 15:00. Norris llega con 24 puntos de ventaja sobre Piastri y 49 sobre Verstappen.</p>
+        </div>
+        <div class="ed-race">
+          <h5>La pelea por el título</h5>
+          <p>Quedan 50 puntos en juego. McLaren ya es campeón de constructores.</p>
+          <ol>
+            <li style="--team:#FF8000"><span><i></i>Lando Norris</span><span class="gap"></span><span class="pts">390</span></li>
+            <li style="--team:#FF8000"><span><i></i>Oscar Piastri</span><span class="gap">a 24</span><span class="pts">366</span></li>
+            <li style="--team:#3671C6"><span><i></i>Max Verstappen</span><span class="gap">a 49</span><span class="pts">341</span></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
