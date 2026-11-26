@@ -24,13 +24,27 @@ const RESULT: Partial<Record<SessionKind, { type: NoticeType; kind: ResultKind }
   race: { type: 'race-result', kind: 'race' },
 }
 
+/**
+ * El mensaje de la carrera lleva las tablas y puede anunciar al campeón, y no se corrige.
+ * Que existan no alcanza: cada una tiene que ser la anterior más lo repartido en la sprint y la carrera.
+ * Una sanción de puntos tampoco cierra: el aviso queda frenado hasta que el autor intervenga.
+ */
+function standingsAddUp(d: SeasonData, round: number): boolean {
+  const total = (rows: { points: number | null }[]) => rows.reduce((sum, r) => sum + (r.points ?? 0), 0)
+  const awarded = total([...resultsOf(d, round, 'sprint'), ...resultsOf(d, round, 'race')])
+  return (['drivers', 'constructors'] as const).every((kind) => {
+    const current = standingsOf(d, round, kind)
+    const previous = standingsOf(d, round - 1, kind) // en la ronda 1 no hay: vale cero
+    if (current.length === 0 || (round > 1 && previous.length === 0)) return false
+    return Math.abs(total(current) - total(previous) - awarded) < 0.001
+  })
+}
+
 export function readyResults(d: SeasonData): Ready {
+  const sessions = new Map(d.results.map((r) => [`${r.round}:${r.kind}`, r]))
   const ready = new Set<string>()
-  for (const { round, kind } of d.results) {
-    // El mensaje de la carrera lleva las tablas: espera a que estén las dos de esa ronda.
-    const complete =
-      kind !== 'race' || (standingsOf(d, round, 'drivers').length > 0 && standingsOf(d, round, 'constructors').length > 0)
-    if (complete && resultsOf(d, round, kind).length > 0) ready.add(`${d.season}:${round}:${kind}`)
+  for (const { round, kind } of sessions.values()) {
+    if (kind !== 'race' || standingsAddUp(d, round)) ready.add(`${d.season}:${round}:${kind}`)
   }
   return ready
 }

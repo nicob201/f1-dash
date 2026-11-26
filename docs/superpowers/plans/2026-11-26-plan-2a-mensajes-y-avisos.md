@@ -125,6 +125,12 @@ Cuando exista la web, `/start` suma su link.
 
 **`/proxima`** es la previa con el título `📅 **Próxima: GP de Qatar** (ronda 22 de 23)`; sin carreras por delante: `La temporada terminó. ¡Nos vemos el año que viene! 👋`. **`/ultima`** es el resultado sin las tablas. **`/campeonato`** son las dos tablas sin `+N`. **Cualquier otra cosa:** la lista de comandos.
 
+## Cambios aprobados durante la ejecución (2026-11-26)
+
+- Las tablas llevan barra de título (variante A).
+- `readyResults` exige que las dos tablas cierren con los puntos de la fecha.
+- Descalificados y excluidos: `DSQ`.
+
 ## Review Focus
 
 1. Primer arranque con la temporada ya cargada: no sale ningún aviso de sesiones anteriores a `notifyFrom`. (Tarea 6)

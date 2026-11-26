@@ -17,9 +17,16 @@ const team = (d: SeasonData, constructorId: string) =>
   teamName(d.constructors.find((x) => x.constructorId === constructorId)?.name ?? constructorId)
 
 const place = (position: number | null) => String(position ?? '—').padStart(2)
-/** Posición de un resultado: quien no clasificó lleva NC y quien no largó, NL. */
+// positionText de Jolpica cuando no es un puesto; los demás (R, N, F) salen como NC.
+const NOT_PLACED: Record<string, string> = { W: 'NL', D: 'DSQ', E: 'DSQ' }
 const finishing = (r: ResultRow) =>
-  r.positionText === null || /^\d+$/.test(r.positionText) ? place(r.position) : r.positionText === 'W' ? 'NL' : 'NC'
+  r.positionText === null || /^\d+$/.test(r.positionText) ? String(r.position ?? '—') : (NOT_PLACED[r.positionText] ?? 'NC')
+
+/** La columna de puesto de una tabla de resultados; si hay un DSQ se ensancha para todas las filas. */
+function finishingColumn(rows: ResultRow[]): (r: ResultRow) => string {
+  const width = Math.max(2, ...rows.map((r) => finishing(r).length))
+  return (r) => finishing(r).padStart(width)
+}
 
 const row = (position: string, driver: string, teamLabel: string, extra = '') =>
   `${position} ${driver}  ${teamLabel.padEnd(12)}${extra}`.trimEnd()
@@ -43,8 +50,10 @@ export const previewMessage = (d: SeasonData, round: number): string =>
 
 export function qualiMessage(d: SeasonData, round: number, kind: 'quali' | 'sprint_quali'): string {
   const title = kind === 'quali' ? 'clasificación' : 'clasificación sprint'
-  const lines = resultsOf(d, round, kind).map((r) =>
-    row(finishing(r), code(d, r.driverId), team(d, r.constructorId), `  ${r.q3 ?? r.q2 ?? r.q1 ?? '—'}`),
+  const results = resultsOf(d, round, kind)
+  const column = finishingColumn(results)
+  const lines = results.map((r) =>
+    row(column(r), code(d, r.driverId), team(d, r.constructorId), `  ${r.q3 ?? r.q2 ?? r.q1 ?? '—'}`),
   )
   return `⏱️ <b>${gp(d, round)}: ${title}</b>\n\n${pre('Tiempos', lines)}`
 }
@@ -67,18 +76,22 @@ export function startMessage(d: SeasonData, round: number, kind: 'race' | 'sprin
   return `${title}\n\nGrilla de salida\n${pre('Grilla', lines)}${note}`
 }
 
-const scoreRow = (d: SeasonData, r: ResultRow) =>
-  row(finishing(r), code(d, r.driverId), team(d, r.constructorId), r.points ? `  ${String(r.points).padStart(2)}` : '')
+function scoreRows(d: SeasonData, results: ResultRow[]): string[] {
+  const column = finishingColumn(results)
+  return results.map((r) =>
+    row(column(r), code(d, r.driverId), team(d, r.constructorId), r.points ? `  ${String(r.points).padStart(2)}` : ''),
+  )
+}
 
 export const sprintResultMessage = (d: SeasonData, round: number): string =>
-  `⚡ <b>${gp(d, round)}: resultado de la sprint</b>\n\n${pre('Sprint', resultsOf(d, round, 'sprint').map((r) => scoreRow(d, r)))}`
+  `⚡ <b>${gp(d, round)}: resultado de la sprint</b>\n\n${pre('Sprint', scoreRows(d, resultsOf(d, round, 'sprint')))}`
 
 /** Top 10 de la carrera y la vuelta rápida. */
 export function raceTop(d: SeasonData, round: number): string {
   const results = resultsOf(d, round, 'race')
   const fastest = results.find((r) => r.fastestLapRank === 1)
   const lap = fastest?.fastestLapTime ? `\nVuelta rápida: ${escapeHtml(code(d, fastest.driverId))}, ${fastest.fastestLapTime}` : ''
-  return pre('Carrera', results.slice(0, 10).map((r) => scoreRow(d, r))) + lap
+  return pre('Carrera', scoreRows(d, results.slice(0, 10))) + lap
 }
 
 /** Las dos tablas. `+N` son los puntos de la fecha, incluida la sprint. */

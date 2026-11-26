@@ -70,7 +70,8 @@ Todos los textos van en español rioplatense y todos los horarios en hora de Arg
 
 - Solo hay avisos de sesiones que empiezan desde la fecha de activación del reloj (`notifyFrom`), para que el primer arranque no publique la temporada ya cargada. *(Aprobado el 2026-11-26.)*
 - La previa también vence a los 30 minutos. Si a la hora de largada no hay grilla ni clasificación, el aviso sale igual, sin la tabla. Sin carreras por delante, el campeón es el P1 de la tabla. *(Aprobado el 2026-11-26.)*
-- La clasificación sprint lista solo a quienes informe OpenF1, que en tres rondas de 2026 fueron 20 o 21. *(Decisión de Claude, pendiente de confirmación.)*
+- La clasificación sprint lista solo a quienes informe OpenF1, que en tres rondas de 2026 fueron 20 o 21. Los descalificados salen como `DSQ`. *(Aprobado el 2026-11-26.)*
+- El resultado de la carrera sale solo si las dos tablas cierran: los puntos de cada una son los de la ronda anterior más lo repartido en la sprint y la carrera. Si no cierran, espera; a las 6 horas, alerta al admin. Una sanción de puntos lo deja frenado hasta que el autor intervenga. *(Aprobado el 2026-11-26. La alerta la implementa el reloj.)*
 - Si Jolpica cambia el horario de una sesión, los avisos programados usan el horario nuevo, porque el calendario se resincroniza (sección 5.3).
 - Si el reloj estuvo caído y un aviso de horario ya pasó, se manda igual solo si no pasaron más de 30 minutos. Pasado ese tiempo se descarta. Los avisos de resultado no vencen. *(Decisión de Claude.)*
 

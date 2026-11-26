@@ -1,5 +1,6 @@
 import quali4 from '../sources/__fixtures__/qualifying-2026-4.json'
 import sprint17 from '../sources/__fixtures__/sprint-2026-17.json'
+import sprint4 from '../sources/__fixtures__/sprint-2026-4.json'
 import of1Result from '../sources/__fixtures__/of1-result-11379.json'
 import { mergeResults, parseQualifying, parseResults } from '../sources/jolpica'
 import { parseSessionResult, sprintQualiRows } from '../sources/openf1'
@@ -127,6 +128,21 @@ describe('resultado de la sprint', () => {
     )
     const lines = pre(sprintResultMessage(data, 17))
     expect([lines[20]!.slice(0, 2), lines[21]!.slice(0, 2)]).toEqual(['NC', 'NL'])
+  })
+})
+
+describe('descalificados', () => {
+  it('Miami, datos reales: DSQ, con las columnas alineadas', () => {
+    const lines = pre(sprintResultMessage({ ...d, ...parseResults(sprint4, 'sprint') }, 4))
+    expect(lines[21]).toBe('DSQ BOR  Audi')
+    expect(lines[0]).toMatch(/^  1 [A-Z]{3} {2}/)
+    for (const line of lines) expect(line.slice(3, 9)).toMatch(/^ [A-Z]{3}  $/)
+    for (const line of lines) expect(line.length).toBeLessThanOrEqual(32)
+  })
+  it('excluido también es DSQ', () => {
+    const data = withSprint17()
+    data.results = data.results.map((r) => (r.kind === 'sprint' && r.position === 22 ? { ...r, positionText: 'E' } : r))
+    expect(pre(sprintResultMessage(data, 17))[21]!.startsWith('DSQ ')).toBe(true)
   })
 })
 
