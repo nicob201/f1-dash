@@ -17,8 +17,10 @@ npm test                 # parsers con respuestas reales y guardado contra una D
 npm run typecheck
 npx wrangler d1 migrations apply f1-dash --local
 npm run seed             # carga la temporada 2026 en la base local (tarda unos minutos)
-npm run seed -- --remote # en la base de Cloudflare
+npm run seed -- --remote # en la base de Cloudflare (ver abajo)
 ```
+
+La base remota todavía no existe. Antes de usar `--remote` hay que crearla con `npx wrangler d1 create f1-dash`, poner su `database_id` en `wrangler.jsonc` y `wrangler.seed.jsonc`, y aplicar las migraciones con `--remote`.
 
 `package.json` deniega los scripts de instalación (`allowScripts`): `esbuild` y `workerd` funcionan con sus binarios opcionales.
 

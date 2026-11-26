@@ -33,10 +33,22 @@ describe('fetchAllPages', () => {
     const offsets: string[] = []
     const pages = await fetchAllPages('https://x/results.json', async () => {}, async (u) => {
       offsets.push(new URL(String(u)).searchParams.get('offset')!)
-      return Response.json({ MRData: { total: '250' } })
+      return Response.json({ MRData: { limit: '100', total: '250' } })
     })
     expect(offsets).toEqual(['0', '100', '200'])
     expect(pages).toHaveLength(3)
+  })
+  it('si la fuente entrega menos filas por página, no saltea ninguna', async () => {
+    const offsets: string[] = []
+    await fetchAllPages('https://x/results.json', async () => {}, async (u) => {
+      offsets.push(new URL(String(u)).searchParams.get('offset')!)
+      return Response.json({ MRData: { limit: '30', total: '70' } })
+    })
+    expect(offsets).toEqual(['0', '30', '60'])
+  })
+  it('sin un tamaño de página válido lanza', async () => {
+    const f = async () => Response.json({ MRData: { limit: '0', total: '70' } })
+    await expect(fetchAllPages('https://x/results.json', async () => {}, f)).rejects.toThrow('x/results.json')
   })
   it('una página que no es ok lanza con la URL', async () => {
     await expect(fetchAllPages('https://x/results.json', async () => {}, reply(429, ''))).rejects.toThrow('x/results.json')
