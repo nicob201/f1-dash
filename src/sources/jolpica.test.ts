@@ -23,6 +23,11 @@ describe('parseCalendar', () => {
     expect(of(22).find((s) => s.kind === 'quali')!.startsAt.toISOString()).toBe('2026-11-28T18:00:00.000Z')
     expect(of(22).find((s) => s.kind === 'race')!.startsAt.toISOString()).toBe('2026-11-29T16:00:00.000Z')
   })
+  it('una hora sin zona lanza en vez de leerse en la zona de la máquina', () => {
+    const copy = structuredClone(calendar)
+    copy.MRData.RaceTable.Races[0]!.time = '04:00:00'
+    expect(() => parseCalendar(copy)).toThrow()
+  })
   it('otra forma lanza', () => {
     expect(() => parseCalendar({ MRData: {} })).toThrow()
   })

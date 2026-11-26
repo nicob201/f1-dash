@@ -28,6 +28,25 @@ describe('fetchJson', () => {
   })
 })
 
+describe('errores y cuerpos', () => {
+  it('un 200 con HTML dice de qué URL vino y conserva la causa', async () => {
+    const err = await fetchJson('https://x/html', reply(200, '<!doctype html>')).catch((e: Error) => e)
+    expect((err as Error).message).toContain('https://x/html')
+    expect((err as Error).cause).toBeInstanceOf(Error)
+  })
+  it.each([404, 429, 403])('%i no deja el cuerpo sin leer', async (status) => {
+    const res = new Response('cuerpo', { status })
+    await fetchJson('https://x', async () => res).catch(() => {})
+    expect(res.bodyUsed).toBe(true)
+  })
+  it('los 429 que se reintentan tampoco', async () => {
+    const sent = [new Response('a', { status: 429 }), new Response('{}')]
+    let i = 0
+    await fetchJson('https://x', retrying429(async () => sent[i++]!, async () => {}, 3))
+    expect(sent[0]!.bodyUsed).toBe(true)
+  })
+})
+
 describe('fetchAllPages', () => {
   it('recorre todas las páginas', async () => {
     const offsets: string[] = []

@@ -6,10 +6,17 @@ const TIMEOUT_MS = 20_000
 
 export async function fetchJson(url: string, fetcher: typeof fetch = fetch): Promise<FetchResult> {
   const res = await fetcher(url, { headers: { 'user-agent': USER_AGENT }, signal: AbortSignal.timeout(TIMEOUT_MS) })
-  if (res.status === 404) return { kind: 'missing' }
-  if (res.status === 429) return { kind: 'rate_limited' }
-  if (!res.ok) throw new Error(`HTTP ${res.status} en ${url}`)
-  return { kind: 'ok', body: await res.json() }
+  if (!res.ok) {
+    await res.body?.cancel() // en Workers, un cuerpo sin leer retiene la conexión
+    if (res.status === 404) return { kind: 'missing' }
+    if (res.status === 429) return { kind: 'rate_limited' }
+    throw new Error(`HTTP ${res.status} en ${url}`)
+  }
+  try {
+    return { kind: 'ok', body: await res.json() }
+  } catch (cause) {
+    throw new Error(`Respuesta ilegible en ${url}`, { cause })
+  }
 }
 
 /** Todas las páginas de una respuesta de Jolpica. */
@@ -39,6 +46,7 @@ export function retrying429(fetcher: typeof fetch, wait: () => Promise<void>, re
       // El timeout del primer intento ya habría vencido después de esperar.
       const res = await fetcher(url, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) })
       if (res.status !== 429 || attempt >= retries) return res
+      await res.body?.cancel()
       await wait()
     }
   }

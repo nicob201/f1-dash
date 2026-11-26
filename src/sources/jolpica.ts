@@ -6,7 +6,8 @@ import type { ConstructorRow, DriverRow, ParsedResults, PitStopRow, RaceRow, Res
 // Jolpica manda los números como texto.
 const num = z.string().regex(/^\d+(\.\d+)?$/).transform(Number)
 const when = z.object({ date: z.iso.date(), time: z.string() })
-const utc = (w: z.infer<typeof when>) => z.coerce.date().parse(`${w.date}T${w.time}`)
+// iso.datetime exige la zona: sin ella, la hora se leería en la zona de la máquina.
+const utc = (w: z.infer<typeof when>) => new Date(z.iso.datetime().parse(`${w.date}T${w.time}`))
 
 const calendarSchema = z.object({
   MRData: z.object({

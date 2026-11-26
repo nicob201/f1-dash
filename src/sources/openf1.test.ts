@@ -17,7 +17,7 @@ describe('cruce de sesiones', () => {
     expect(key(17, 'sprint_quali')).toBe(11379)
   })
   it('Miami: 3 h de diferencia y cruza igual', () => {
-    expect(key(4, 'race')).not.toBeNull()
+    expect(key(4, 'race')).toBe(11280)
   })
   it('una cancelada o lejana no cruza', () => {
     const s = [{ season: 2026, round: 1, kind: 'race' as const, startsAt: new Date('2026-01-01T12:00:00Z'), openf1Key: null }]
