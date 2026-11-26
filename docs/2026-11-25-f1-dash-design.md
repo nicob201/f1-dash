@@ -143,6 +143,8 @@ El texto exacto de cada mensaje lo define el builder dentro de este tono. La reg
 
 Los comandos leen solo la base. No consultan Jolpica ni OpenF1. *(La lista de comandos es una decisión de Claude.)*
 
+*(Aprobado el 2026-11-26:)* el bot contesta solo en chats privados; fotos, stickers y audios reciben la lista de comandos; Telegram muestra el menú de comandos; mientras el canal no esté abierto, `/start` dice "El canal con los avisos está por abrir.".
+
 ### 4.5 Setup de Telegram
 
 - El bot tiene que ser administrador del canal para poder publicar.
