@@ -3,6 +3,8 @@
   "name": "f1-dash",
   "main": "src/index.ts",
   "compatibility_date": "2026-11-20",
+  "workers_dev": true,
+  "preview_urls": false,
   "observability": { "enabled": true },
-  "d1_databases": [{ "binding": "DB", "database_name": "f1-dash", "database_id": "local", "migrations_dir": "drizzle" }]
+  "d1_databases": [{ "binding": "DB", "database_name": "f1-dash", "database_id": "aedfd615-d833-4de4-bacf-9d7eb25780f3", "migrations_dir": "drizzle" }]
 }

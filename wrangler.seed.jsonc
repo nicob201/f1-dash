@@ -4,5 +4,5 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-11-20",
   "observability": { "enabled": true },
-  "d1_databases": [{ "binding": "DB", "database_name": "f1-dash", "database_id": "local", "migrations_dir": "drizzle", "remote": true }]
+  "d1_databases": [{ "binding": "DB", "database_name": "f1-dash", "database_id": "aedfd615-d833-4de4-bacf-9d7eb25780f3", "migrations_dir": "drizzle", "remote": true }]
 }

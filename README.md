@@ -24,7 +24,16 @@ npm run avisos -- race-result 21 --enviar  # te lo manda a ese chat
 npm run webhook -- https://…workers.dev    # conecta el bot con el Worker desplegado
 ```
 
-La base remota todavía no existe. Antes de usar `--remote` hay que crearla con `npx wrangler d1 create f1-dash`, poner su `database_id` en `wrangler.jsonc` y `wrangler.seed.jsonc`, y aplicar las migraciones con `--remote`.
+## Despliegue
+
+El Worker y la base D1 `f1-dash` ya están en Cloudflare (el `database_id` está en `wrangler.jsonc` y `wrangler.seed.jsonc`).
+
+```bash
+npx wrangler d1 migrations apply f1-dash --remote   # si hay migraciones nuevas
+npx wrangler deploy
+```
+
+Los secretos del Worker (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`) se cargan con `npx wrangler secret put`. Para que `/start` muestre el canal o la web: variables `CHANNEL_LINK` y `WEB_URL`.
 
 Para enviar, `.dev.vars` (ignorado por git) necesita `TELEGRAM_BOT_TOKEN` y `ADMIN_CHAT_ID`. `--enviar` se niega a mandar a un canal o grupo.
 
