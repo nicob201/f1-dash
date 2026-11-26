@@ -92,7 +92,10 @@ describe('respuestas', () => {
 })
 
 describe('fallas', () => {
-  const brokenDb = { prepare: () => { throw new Error('D1 caída') }, batch: () => { throw new Error('D1 caída') } }
+  // Falla al ejecutar, como una caída real: ahí Drizzle envuelve el error y su mensaje es el SQL.
+  const down = async () => { throw new Error('D1_ERROR: D1 caída') }
+  const statement = { bind: () => statement, all: down, raw: down, first: down, run: down }
+  const brokenDb = { prepare: () => statement, batch: down }
   const logged = () => vi.spyOn(console, 'error').mockImplementation(() => {})
   const assertNoSecrets = (log: ReturnType<typeof logged>) => {
     const text = log.mock.calls.flat().map(String).join(' ')
@@ -105,7 +108,14 @@ describe('fallas', () => {
     const res = await post(message('/ultima'), { env: bindings({ DB: brokenDb as unknown as D1Database }) })
     expect(res.status).toBe(200)
     expect(sent).toEqual([])
-    expect(assertNoSecrets(log)).toContain('/ultima')
+    const text = assertNoSecrets(log)
+    expect(text).toBe('bot /ultima: D1_ERROR: D1 caída')
+  })
+  it('un error de varias líneas queda en una', async () => {
+    const log = logged()
+    const multi = { prepare: () => { throw new Error('uno\ndos') } }
+    await post(message('/ultima'), { env: bindings({ DB: multi as unknown as D1Database }) })
+    expect(assertNoSecrets(log)).not.toContain('\n')
   })
   it('con la base caída, /start igual contesta', async () => {
     await post(message('/start'), { env: bindings({ DB: brokenDb as unknown as D1Database }) })

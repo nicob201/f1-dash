@@ -29,6 +29,12 @@ async function sameSecret(received: string, expected: string): Promise<boolean> 
   return subtle.timingSafeEqual(a, b)
 }
 
+/** La causa en una línea. Drizzle envuelve las fallas de D1: su mensaje es el SQL y el motivo queda en `cause`. */
+function cause(e: unknown): string {
+  const root = e instanceof Error && e.cause instanceof Error ? e.cause : e
+  return (root instanceof Error ? root.message : String(root)).replace(/\s+/g, ' ')
+}
+
 export function createApp(fetcher: typeof fetch = fetch) {
   const app = new Hono<{ Bindings: Bindings }>()
 
@@ -54,7 +60,7 @@ export function createApp(fetcher: typeof fetch = fetch) {
       const result = await sendMessage(c.env.TELEGRAM_BOT_TOKEN, String(chat.id), reply, fetcher)
       if (!result.ok) console.error(`bot ${command}: Telegram ${result.status ?? 'sin respuesta'} ${result.description}`)
     } catch (e) {
-      console.error(`bot ${command}: ${e instanceof Error ? e.message : String(e)}`)
+      console.error(`bot ${command}: ${cause(e)}`)
     }
     return c.body(null, 200)
   })
