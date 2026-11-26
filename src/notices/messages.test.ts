@@ -9,7 +9,9 @@ import type { SeasonData } from './data'
 import { previewMessage, qualiMessage, raceResultMessage, sprintResultMessage, startMessage } from './messages'
 
 const d = season2026()
-const pre = (m: string) => [...m.matchAll(/<pre>([\s\S]*?)<\/pre>/g)].flatMap((x) => x[1]!.split('\n'))
+const TABLE = /<pre><code class="language-([A-Za-z]+)">([\s\S]*?)<\/code><\/pre>/g
+const pre = (m: string) => [...m.matchAll(TABLE)].flatMap((x) => x[2]!.split('\n'))
+const titles = (m: string) => [...m.matchAll(TABLE)].map((x) => x[1])
 const top = (data: SeasonData, n: number): SeasonData => ({
   ...data,
   results: data.results.filter((r) => r.position !== null && r.position <= n),
@@ -41,9 +43,9 @@ const withTitleDecidedAt21 = (data: SeasonData): SeasonData => ({
 describe('previa', () => {
   it('Qatar', () => {
     expect(previewMessage(d, 22)).toBe(
-      '🗓️ <b>Se viene el GP de Qatar</b> (ronda 22 de 23)\nCircuito Internacional de Lusail\n\n<pre>' +
+      '🗓️ <b>Se viene el GP de Qatar</b> (ronda 22 de 23)\nCircuito Internacional de Lusail\n\n<pre><code class="language-Horarios">' +
         'Vie 27  Práctica libre 1  10:30\nVie 27  Práctica libre 2  14:00\nSáb 28  Práctica libre 3  11:30\n' +
-        'Sáb 28  Clasificación     15:00\nDom 29  Carrera           13:00</pre>\nHorarios de Argentina.',
+        'Sáb 28  Clasificación     15:00\nDom 29  Carrera           13:00</code></pre>\nHorarios de Argentina.',
     )
   })
   it('un día de una sola cifra no desalinea', () => {
@@ -57,8 +59,8 @@ describe('previa', () => {
 describe('clasificación', () => {
   it('texto completo', () => {
     expect(qualiMessage(top(d, 3), 21, 'quali')).toBe(
-      '⏱️ <b>GP de Las Vegas: clasificación</b>\n\n<pre> 1 ANT  Mercedes      1:33.893\n' +
-        ' 2 VER  Red Bull      1:34.151\n 3 RUS  Mercedes      1:34.224</pre>',
+      '⏱️ <b>GP de Las Vegas: clasificación</b>\n\n<pre><code class="language-Tiempos"> 1 ANT  Mercedes      1:33.893\n' +
+        ' 2 VER  Red Bull      1:34.151\n 3 RUS  Mercedes      1:34.224</code></pre>',
     )
   })
   it('completa, con el tiempo de la última tanda que corrió cada uno', () => {
@@ -89,13 +91,13 @@ describe('clasificación', () => {
 describe('largada', () => {
   it('grilla de OpenF1, con un número sin piloto', () => {
     expect(startMessage({ ...d, grids: [grid(99, 2), grid(3, 1)] }, 21, 'race')).toBe(
-      '🚦 <b>Hora de largada en Las Vegas</b>\n\nGrilla de salida\n<pre> 1 VER  Red Bull\n 2 #99</pre>',
+      '🚦 <b>Hora de largada en Las Vegas</b>\n\nGrilla de salida\n<pre><code class="language-Grilla"> 1 VER  Red Bull\n 2 #99</code></pre>',
     )
   })
   it('plan B: orden de la clasificación, con la aclaración', () => {
     const m = startMessage(top(d, 3), 21, 'race')
     expect(m).toBe(
-      '🚦 <b>Hora de largada en Las Vegas</b>\n\nGrilla de salida\n<pre> 1 ANT  Mercedes\n 2 VER  Red Bull\n 3 RUS  Mercedes</pre>\n' +
+      '🚦 <b>Hora de largada en Las Vegas</b>\n\nGrilla de salida\n<pre><code class="language-Grilla"> 1 ANT  Mercedes\n 2 VER  Red Bull\n 3 RUS  Mercedes</code></pre>\n' +
         'Orden según la clasificación; puede cambiar por penalizaciones.',
     )
   })
@@ -113,7 +115,7 @@ describe('largada', () => {
 describe('resultado de la sprint', () => {
   it('lista completa, con puntos solo para quienes sumaron', () => {
     const lines = pre(sprintResultMessage(withSprint17(), 17))
-    expect(sprintResultMessage(withSprint17(), 17).startsWith('⚡ <b>GP de Singapur: resultado de la sprint</b>\n\n<pre>')).toBe(true)
+    expect(sprintResultMessage(withSprint17(), 17).startsWith('⚡ <b>GP de Singapur: resultado de la sprint</b>\n\n<pre><code class="language-Sprint">')).toBe(true)
     expect(lines).toHaveLength(22)
     expect(lines[0]).toBe(' 1 VER  Red Bull       8')
     expect(lines[8]).toMatch(/^ 9 [A-Z]{3} {2}\D+$/)
@@ -131,15 +133,15 @@ describe('resultado de la sprint', () => {
 describe('resultado de la carrera', () => {
   it('texto completo', () => {
     expect(raceResultMessage(top(d, 3), 21, 'https://example.test')).toBe(
-      '🏁 <b>GP de Las Vegas: resultado</b>\n\n<pre> 1 VER  Red Bull      25\n 2 NOR  McLaren       18\n 3 PIA  McLaren       15</pre>\n\n' +
-        '🏆 <b>Pilotos</b>\n<pre> 1 ANT  402\n 2 VER  304\n 3 HAM  267</pre>\n\n' +
-        '🔧 <b>Constructores</b>\n<pre> 1 Mercedes      666\n 2 Ferrari       517\n 3 Red Bull      440</pre>\n\n' +
+      '🏁 <b>GP de Las Vegas: resultado</b>\n\n<pre><code class="language-Carrera"> 1 VER  Red Bull      25\n 2 NOR  McLaren       18\n 3 PIA  McLaren       15</code></pre>\n\n' +
+        '🏆 <b>Pilotos</b>\n<pre><code class="language-Pilotos"> 1 ANT  402\n 2 VER  304\n 3 HAM  267</code></pre>\n\n' +
+        '🔧 <b>Constructores</b>\n<pre><code class="language-Constructores"> 1 Mercedes      666\n 2 Ferrari       517\n 3 Red Bull      440</code></pre>\n\n' +
         'Todo el detalle en <a href="https://example.test/carreras/2026/21">la web</a>',
     )
   })
   it('top 10 y vuelta rápida, aunque la haya hecho alguien de más atrás', () => {
     const m = raceResultMessage(d, 21, null)
-    expect(m).toContain('</pre>\nVuelta rápida: LAW, 1:35.591\n\n🏆')
+    expect(m).toContain('</code></pre>\nVuelta rápida: LAW, 1:35.591\n\n🏆')
     expect(pre(m)).toHaveLength(10 + 10 + 11)
     expect(pre(m)[9]).toBe('10 LEC  Ferrari        1')
     expect(m).not.toContain('Todo el detalle')
@@ -162,7 +164,7 @@ describe('resultado de la carrera', () => {
   it('la línea de campeón aparece solo en la fecha que define', () => {
     expect(raceResultMessage(d, 21, null)).not.toContain('👑')
     expect(raceResultMessage(withTitleDecidedAt21(d), 21, null)).toContain(
-      'resultado</b>\n👑 <b>Andrea Kimi Antonelli es campeón del mundo</b>\n\n<pre>',
+      'resultado</b>\n👑 <b>Andrea Kimi Antonelli es campeón del mundo</b>\n\n<pre><code class="language-Carrera">',
     )
   })
   it('campeón de constructores', () => {
@@ -175,6 +177,18 @@ describe('resultado de la carrera', () => {
     }
     expect(raceResultMessage(data, 21, null)).toContain('👑 <b>Mercedes es campeón del mundo de constructores</b>')
   })
+})
+
+it('cada tabla lleva barra de título: ahí queda el botón de copiar de Telegram, sin tapar datos', () => {
+  const sprint = withSprint17()
+  expect(titles(previewMessage(d, 22))).toEqual(['Horarios'])
+  expect(titles(qualiMessage(d, 21, 'quali'))).toEqual(['Tiempos'])
+  expect(titles(startMessage(d, 21, 'race'))).toEqual(['Grilla'])
+  expect(titles(sprintResultMessage(sprint, 17))).toEqual(['Sprint'])
+  expect(titles(raceResultMessage(d, 21, null))).toEqual(['Carrera', 'Pilotos', 'Constructores'])
+  // ninguna tabla queda sin barra
+  const all = [previewMessage(d, 22), qualiMessage(d, 21, 'quali'), startMessage(d, 21, 'race'), raceResultMessage(d, 21, null)]
+  for (const m of all) expect(m).not.toMatch(/<pre>(?!<code class)/)
 })
 
 it('ancho, tamaño y escape', () => {

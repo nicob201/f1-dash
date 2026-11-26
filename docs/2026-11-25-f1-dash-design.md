@@ -53,7 +53,7 @@ Un proyecto personal con dos partes:
 
 ## 4. El canal y el bot
 
-Todos los textos van en español rioplatense y todos los horarios en hora de Argentina (`America/Argentina/Buenos_Aires`). Los mensajes usan `parse_mode: HTML` y las tablas van en `<pre>` para que las columnas queden alineadas en el celular.
+Todos los textos van en español rioplatense y todos los horarios en hora de Argentina (`America/Argentina/Buenos_Aires`). Los mensajes usan `parse_mode: HTML` y las tablas van en `<pre>` para que las columnas queden alineadas en el celular. Cada tabla lleva barra de título (`<pre><code class="language-Pilotos">`), para que el botón de copiar de Telegram no tape datos. *(Elegido por el autor el 2026-11-26.)*
 
 ### 4.1 Avisos del canal
 

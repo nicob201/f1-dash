@@ -4,7 +4,10 @@ import { arDay, arTime, escapeHtml, gpName, sessionLabel, teamName } from '../fo
 import type { ResultRow, StandingRow } from '../types'
 import { raceOf, resultsOf, standingsOf, type SeasonData } from './data'
 
-const pre = (lines: string[]) => `<pre>${escapeHtml(lines.join('\n'))}</pre>`
+// Con "lenguaje", Telegram pone una barra con ese título: ahí va su botón de copiar y no tapa datos.
+// El título es una sola palabra sin acentos.
+const pre = (title: string, lines: string[]) =>
+  `<pre><code class="language-${title}">${escapeHtml(lines.join('\n'))}</code></pre>`
 const name = (d: SeasonData, round: number) => gpName(raceOf(d, round).name)
 const gp = (d: SeasonData, round: number) => escapeHtml(name(d, round).gp)
 
@@ -23,6 +26,7 @@ const row = (position: string, driver: string, teamLabel: string, extra = '') =>
 
 export function scheduleBlock(d: SeasonData, round: number): string {
   return pre(
+    'Horarios',
     d.sessions
       .filter((s) => s.round === round)
       .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime())
@@ -42,7 +46,7 @@ export function qualiMessage(d: SeasonData, round: number, kind: 'quali' | 'spri
   const lines = resultsOf(d, round, kind).map((r) =>
     row(finishing(r), code(d, r.driverId), team(d, r.constructorId), `  ${r.q3 ?? r.q2 ?? r.q1 ?? '—'}`),
   )
-  return `⏱️ <b>${gp(d, round)}: ${title}</b>\n\n${pre(lines)}`
+  return `⏱️ <b>${gp(d, round)}: ${title}</b>\n\n${pre('Tiempos', lines)}`
 }
 
 export function startMessage(d: SeasonData, round: number, kind: 'race' | 'sprint'): string {
@@ -60,21 +64,21 @@ export function startMessage(d: SeasonData, round: number, kind: 'race' | 'sprin
     return who ? row(place(g.position), code(d, who.driverId), team(d, who.constructorId)) : `${place(g.position)} #${g.carNumber}`
   })
   const note = official.length ? '' : '\nOrden según la clasificación; puede cambiar por penalizaciones.'
-  return `${title}\n\nGrilla de salida\n${pre(lines)}${note}`
+  return `${title}\n\nGrilla de salida\n${pre('Grilla', lines)}${note}`
 }
 
 const scoreRow = (d: SeasonData, r: ResultRow) =>
   row(finishing(r), code(d, r.driverId), team(d, r.constructorId), r.points ? `  ${String(r.points).padStart(2)}` : '')
 
 export const sprintResultMessage = (d: SeasonData, round: number): string =>
-  `⚡ <b>${gp(d, round)}: resultado de la sprint</b>\n\n${pre(resultsOf(d, round, 'sprint').map((r) => scoreRow(d, r)))}`
+  `⚡ <b>${gp(d, round)}: resultado de la sprint</b>\n\n${pre('Sprint', resultsOf(d, round, 'sprint').map((r) => scoreRow(d, r)))}`
 
 /** Top 10 de la carrera y la vuelta rápida. */
 export function raceTop(d: SeasonData, round: number): string {
   const results = resultsOf(d, round, 'race')
   const fastest = results.find((r) => r.fastestLapRank === 1)
   const lap = fastest?.fastestLapTime ? `\nVuelta rápida: ${escapeHtml(code(d, fastest.driverId))}, ${fastest.fastestLapTime}` : ''
-  return pre(results.slice(0, 10).map((r) => scoreRow(d, r))) + lap
+  return pre('Carrera', results.slice(0, 10).map((r) => scoreRow(d, r))) + lap
 }
 
 /** Las dos tablas. `+N` son los puntos de la fecha, incluida la sprint. */
@@ -92,7 +96,7 @@ export function standingsBlocks(d: SeasonData, round: number, withGains: boolean
   const constructors = standingsOf(d, round, 'constructors').map(
     (s) => `${place(s.position)} ${team(d, s.entityId).padEnd(12)}  ${String(s.points).padStart(3)}${gain(s)}`,
   )
-  return `🏆 <b>Pilotos</b>\n${pre(drivers)}\n\n🔧 <b>Constructores</b>\n${pre(constructors)}`
+  return `🏆 <b>Pilotos</b>\n${pre('Pilotos', drivers)}\n\n🔧 <b>Constructores</b>\n${pre('Constructores', constructors)}`
 }
 
 function championLines(d: SeasonData, round: number): string {

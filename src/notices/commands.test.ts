@@ -29,7 +29,7 @@ it('/proxima con la temporada terminada', () => {
 })
 it('/ultima es el resultado sin las tablas', () => {
   const m = reply('/ultima')
-  expect(m.startsWith('🏁 <b>GP de Las Vegas: resultado</b>\n\n<pre> 1 VER')).toBe(true)
+  expect(m.startsWith('🏁 <b>GP de Las Vegas: resultado</b>\n\n<pre><code class="language-Carrera"> 1 VER')).toBe(true)
   expect(m).toContain('Vuelta rápida: LAW')
   expect(m).not.toContain('🏆')
 })
