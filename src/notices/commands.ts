@@ -40,9 +40,17 @@ function championship(d: SeasonData): string {
   return round === null ? NO_RACES : standingsBlocks(d, round, false)
 }
 
-export function commandReply(text: string, d: SeasonData, now: Date, links: Links): string {
+export type Command = '/start' | '/proxima' | '/ultima' | '/campeonato' | 'help'
+const KNOWN: readonly Command[] = ['/start', '/proxima', '/ultima', '/campeonato']
+
+export function parseCommand(text: string): Command {
   // "/Proxima@F1DashArBot ahora" → "/proxima"
-  const command = text.trim().split(/[\s@]/)[0]!.toLowerCase()
+  const word = text.trim().split(/[\s@]/)[0]!.toLowerCase()
+  return KNOWN.find((c) => c === word) ?? 'help'
+}
+
+export function commandReply(text: string, d: SeasonData, now: Date, links: Links): string {
+  const command = parseCommand(text)
   if (command === '/start') return welcome(links)
   if (command === '/proxima') return next(d, now)
   if (command === '/ultima') return last(d)
