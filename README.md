@@ -19,9 +19,13 @@ npx wrangler d1 migrations apply f1-dash --local
 npm run seed             # carga la temporada 2026 en la base local (tarda unos minutos)
 npm run seed -- --remote # en la base de Cloudflare (ver abajo)
 npm run avisos -- race-result 21  # muestra un mensaje armado con la base local
+npm run avisos -- --mi-chat       # id de tu chat privado con el bot
+npm run avisos -- race-result 21 --enviar  # te lo manda a ese chat
 ```
 
 La base remota todavía no existe. Antes de usar `--remote` hay que crearla con `npx wrangler d1 create f1-dash`, poner su `database_id` en `wrangler.jsonc` y `wrangler.seed.jsonc`, y aplicar las migraciones con `--remote`.
+
+Para enviar, `.dev.vars` (ignorado por git) necesita `TELEGRAM_BOT_TOKEN` y `ADMIN_CHAT_ID`. `--enviar` se niega a mandar a un canal o grupo.
 
 `package.json` deniega los scripts de instalación (`allowScripts`): `esbuild` y `workerd` funcionan con sus binarios opcionales.
 
