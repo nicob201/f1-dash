@@ -379,7 +379,7 @@ Las dos carreras que quedan de 2026 (Qatar el 29/11 y Abu Dabi el 6/12) sirven p
 2. **Cuánto tarda Jolpica en publicar resultados y tablas** después de cada sesión. No está documentado, y de eso depende a qué hora sale el mensaje de cierre. Se mide este fin de semana con un script que consulte cada pocos minutos y anote cuándo aparece cada dato. Si tarda horas, plan B: armar el resultado con `session_result` de OpenF1 (verificado que existe) y sumar los puntos nosotros.
 3. **Cuándo publica OpenF1 la grilla** (antes de la carrera o recién después), si tiene la de la sprint y si restringe el acceso sin login mientras hay una sesión en vivo. *(2026-11-26: la de la sprint está, con el `session_key` de la clasificación sprint; en Singapur coincide en los 22 con Jolpica. El resto se mide en Qatar con el Worker `_lab/f1-dash-medicion`.)*
 4. **La Cache API en `*.workers.dev`.** No es bloqueante, porque los snapshots ya resuelven la carga (sección 6.3).
-5. **CPU del reloj:** medir en producción que una ejecución con resultados nuevos y el recálculo de snapshots entre en 10 ms de CPU. Si no entra, el recálculo pasa a la ejecución siguiente.
+5. **CPU del reloj:** medir en producción que una ejecución con resultados nuevos y el recálculo de snapshots entre en 10 ms de CPU. Si no entra, el recálculo pasa a la ejecución siguiente. *(2026-11-26, primera medición, del **webhook del bot** y no del reloj: en 8 mensajes reales los tiempos de CPU fueron 11, 5, 8, 14, 1, 1, 7 y 1 ms. Todos terminaron `ok`, pero dos superaron los 10 ms. El registro no dice qué comando fue cada uno. **Pendiente:** identificarlos y bajar el consumo.)*
 
 ## 10. Lo que queda al builder
 
