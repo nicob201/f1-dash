@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "efdcf0da-6e1f-4031-979c-151e5332bfd8",
+  "id": "8560ef1f-06a8-4621-ae25-0d5eeca5f275",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "constructors": {
@@ -529,7 +529,7 @@
           "name": "position",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "points": {

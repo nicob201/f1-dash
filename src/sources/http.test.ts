@@ -1,4 +1,4 @@
-import { fetchAllPages, fetchJson } from './http'
+import { fetchAllPages, fetchJson, retrying429 } from './http'
 
 const reply = (status: number, body: string) => async () => new Response(body, { status })
 
@@ -40,5 +40,29 @@ describe('fetchAllPages', () => {
   })
   it('una página que no es ok lanza con la URL', async () => {
     await expect(fetchAllPages('https://x/results.json', async () => {}, reply(429, ''))).rejects.toThrow('x/results.json')
+  })
+})
+
+describe('retrying429', () => {
+  const sequence = (...statuses: number[]) => {
+    const signals: unknown[] = []
+    const fetcher: typeof fetch = async (_u, init) => {
+      signals.push(init?.signal)
+      return new Response('{}', { status: statuses[signals.length - 1] })
+    }
+    return { signals, fetcher }
+  }
+
+  it('espera y reintenta hasta que deja de haber 429, con un timeout nuevo cada vez', async () => {
+    const { signals, fetcher } = sequence(429, 429, 200)
+    let waits = 0
+    const res = await fetchJson('https://x', retrying429(fetcher, async () => { waits++ }, 5))
+    expect([res.kind, waits, signals.length]).toEqual(['ok', 2, 3])
+    expect(new Set(signals).size).toBe(3)
+  })
+  it('se rinde después de los reintentos', async () => {
+    const { signals, fetcher } = sequence(429, 429, 429)
+    const res = await fetchJson('https://x', retrying429(fetcher, async () => {}, 2))
+    expect([res.kind, signals.length]).toEqual(['rate_limited', 3])
   })
 })

@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "typecheck": "wrangler types --include-runtime=true && tsc --noEmit"
+    "typecheck": "wrangler types --include-runtime=true && tsc --noEmit",
+    "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.4",

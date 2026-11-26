@@ -61,7 +61,7 @@ export const standings = sqliteTable('standings', {
   round: integer().notNull(),
   kind: text().$type<StandingRow['kind']>().notNull(),
   entityId: text('entity_id').notNull(),
-  position: integer().notNull(),
+  position: integer(),
   points: real().notNull(),
   wins: integer().notNull(),
 }, (t) => [primaryKey({ columns: [t.season, t.round, t.kind, t.entityId] })])

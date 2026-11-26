@@ -1,6 +1,7 @@
 import { env } from 'cloudflare:workers'
 import { drizzle } from 'drizzle-orm/d1'
 import calendar from '../sources/__fixtures__/calendar-2026.json'
+import drivers1 from '../sources/__fixtures__/driverstandings-2026-1.json'
 import drivers21 from '../sources/__fixtures__/driverstandings-2026-21.json'
 import of1Grid from '../sources/__fixtures__/of1-grid-11379.json'
 import of1Sessions from '../sources/__fixtures__/of1-sessions-2026.json'
@@ -72,6 +73,10 @@ it('el calendario actualiza un horario cambiado y guarda UTC en milisegundos', a
   const moved = new Date('2026-11-29T17:00:00Z')
   await saveCalendar(db, cal.races, cal.sessions.map((s) => (s.round === 22 && s.kind === 'race' ? { ...s, startsAt: moved } : s)))
   expect(await count('sessions', `round = 22 and kind = 'race' and starts_at = ${moved.getTime()}`)).toBe(1)
+})
+it('guarda una tabla con un piloto sin puesto', async () => {
+  await saveStandings(db, parseStandings(drivers1, 'drivers'))
+  expect([await count('standings'), await count('standings', 'position is null')]).toEqual([22, 1])
 })
 it('tablas, paradas y grilla', async () => {
   const grid = parseGrid(of1Grid).map((g) => ({ ...g, season: 2026, round: 17, kind: 'sprint' as const, source: 'openf1' as const }))

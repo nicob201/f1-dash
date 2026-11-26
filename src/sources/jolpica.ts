@@ -152,7 +152,8 @@ export function parseQualifying(body: unknown): ParsedResults {
   return toRows(races, 'quali', (e) => ({ q1: e.Q1 ?? null, q2: e.Q2 ?? null, q3: e.Q3 ?? null }))
 }
 
-const standing = z.object({ position: num, points: num, wins: num })
+// Sin puesto (positionText "-") Jolpica no manda position.
+const standing = z.object({ position: num.optional(), points: num, wins: num })
 const standingsTable = <T extends z.ZodType>(list: T) =>
   z.object({ MRData: z.object({ StandingsTable: z.object({ StandingsLists: z.array(list) }) }) })
 const driverStandings = standingsTable(
@@ -174,7 +175,7 @@ export function parseStandings(body: unknown, kind: StandingRow['kind']): Standi
           entries: l.ConstructorStandings.map((e) => ({ ...e, entityId: e.Constructor.constructorId })),
         }))
   return lists.flatMap(({ season, round, entries }) =>
-    entries.map(({ entityId, position, points, wins }) => ({ season, round, kind, entityId, position, points, wins })),
+    entries.map(({ entityId, position = null, points, wins }) => ({ season, round, kind, entityId, position, points, wins })),
   )
 }
 

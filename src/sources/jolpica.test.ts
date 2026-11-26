@@ -1,5 +1,6 @@
 import calendar from './__fixtures__/calendar-2026.json'
 import constructors21 from './__fixtures__/constructorstandings-2026-21.json'
+import drivers1 from './__fixtures__/driverstandings-2026-1.json'
 import drivers21 from './__fixtures__/driverstandings-2026-21.json'
 import pits17 from './__fixtures__/pitstops-2026-17.json'
 import quali21 from './__fixtures__/qualifying-2026-21.json'
@@ -85,6 +86,11 @@ describe('tablas y paradas', () => {
     expect(s).toHaveLength(25)
     expect(s[0]).toEqual({ season: 2026, round: 21, kind: 'drivers', entityId: 'antonelli', position: 1, points: 402, wins: 9 })
     expect(s[1]).toMatchObject({ entityId: 'max_verstappen', points: 304 })
+  })
+  it('un piloto sin puesto en la tabla queda con position null', () => {
+    const s = parseStandings(drivers1, 'drivers')
+    expect(s).toHaveLength(22)
+    expect(s[21]).toEqual({ season: 2026, round: 1, kind: 'drivers', entityId: 'stroll', position: null, points: 0, wins: 0 })
   })
   it('constructores', () => {
     const s = parseStandings(constructors21, 'constructors')

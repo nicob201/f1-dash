@@ -82,7 +82,7 @@ CREATE TABLE `standings` (
 	`round` integer NOT NULL,
 	`kind` text NOT NULL,
 	`entity_id` text NOT NULL,
-	`position` integer NOT NULL,
+	`position` integer,
 	`points` real NOT NULL,
 	`wins` integer NOT NULL,
 	PRIMARY KEY(`season`, `round`, `kind`, `entity_id`)
