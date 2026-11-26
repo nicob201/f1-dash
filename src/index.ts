@@ -1,1 +1,3 @@
-export default {} satisfies ExportedHandler<Env>
+import { createApp } from './app'
+
+export default createApp()
