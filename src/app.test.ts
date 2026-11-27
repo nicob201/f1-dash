@@ -139,8 +139,49 @@ describe('fallas', () => {
   })
 })
 
+describe('api de la web', () => {
+  const HOME = '{"season":2026,"races":[]}'
+  const RACE = '{"season":2026,"round":21}'
+  beforeAll(async () => {
+    const put = env.DB.prepare('insert or replace into kv (key, value) values (?, ?)')
+    await env.DB.batch([put.bind('home', HOME), put.bind('race:2026:21', RACE)])
+  })
+  const get = (path: string, e = bindings()) => app.request(path, {}, e)
+  const headers = (res: Response) => [res.headers.get('content-type'), res.headers.get('cache-control')]
+
+  it('devuelve los snapshots guardados', async () => {
+    const home = await get('/api/home')
+    expect(home.status).toBe(200)
+    expect(await home.text()).toBe(`{"channel":null,"snapshot":${HOME}}`)
+    expect(headers(home)).toEqual(['application/json', 'public, max-age=60'])
+    const race = await get('/api/races/2026/21')
+    expect([race.status, await race.text()]).toEqual([200, RACE])
+    expect(headers(race)).toEqual(['application/json', 'public, max-age=60'])
+  })
+  it.each([
+    [undefined, null], ['', null], ['@canal', '@canal'], ['a"b\\c', 'a"b\\c'],
+  ])('con CHANNEL_LINK %j el canal es %j', async (value, channel) => {
+    const res = await get('/api/home', bindings({ CHANNEL_LINK: value }))
+    expect(await res.json()).toEqual({ channel, snapshot: JSON.parse(HOME) })
+  })
+  it.each([
+    '/api/races/2026/22', '/api/races/2026/0', '/api/races/2026/999', '/api/races/abc/1', '/api/races/2026', '/api/nada',
+  ])('%s → 404 en JSON, sin caché', async (path) => {
+    const res = await get(path)
+    expect([res.status, await res.json(), res.headers.get('cache-control')]).toEqual([404, { error: 'not_found' }, null])
+  })
+  it('base caída: 500 y la causa en el log', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const down = async () => { throw new Error('D1_ERROR: D1 caída') }
+    const statement = { bind: () => statement, first: down }
+    const res = await get('/api/home', bindings({ DB: { prepare: () => statement } as unknown as D1Database }))
+    expect([res.status, await res.json()]).toEqual([500, { error: 'unavailable' }])
+    expect(log.mock.calls).toEqual([['api /api/home: D1_ERROR: D1 caída']])
+  })
+})
+
 it('no hay más rutas', async () => {
-  for (const [path, method] of [['/', 'GET'], ['/telegram/webhook', 'GET'], ['/api/home', 'GET'], ['/', 'POST']] as const) {
+  for (const [path, method] of [['/', 'GET'], ['/telegram/webhook', 'GET'], ['/api/nada', 'GET'], ['/', 'POST']] as const) {
     expect((await app.request(path, { method }, bindings())).status).toBe(404)
   }
 })

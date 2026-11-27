@@ -1,6 +1,6 @@
-// Rutas del Worker. Por ahora, solo el webhook del bot.
+// Rutas del Worker: la API de la web y el webhook del bot. El resto son archivos estáticos.
 import { drizzle } from 'drizzle-orm/d1'
-import { Hono } from 'hono'
+import { Hono, type Context } from 'hono'
 import { z } from 'zod'
 import { loadForCommand } from './db/queries'
 import { commandReply, parseCommand } from './notices/commands'
@@ -35,6 +35,21 @@ function cause(e: unknown): string {
   return (root instanceof Error ? root.message : String(root)).replace(/\s+/g, ' ')
 }
 
+/**
+ * Devuelve un snapshot como está guardado, sin interpretarlo: hay 10 ms de CPU por pedido.
+ * `wrap` le agrega texto alrededor.
+ */
+async function snapshot(c: Context<{ Bindings: Bindings }>, key: string, wrap = (json: string) => json) {
+  try {
+    const value = await c.env.DB.prepare('select value from kv where key = ?').bind(key).first<string>('value')
+    if (value === null) return c.json({ error: 'not_found' }, 404)
+    return c.body(wrap(value), 200, { 'content-type': 'application/json', 'cache-control': 'public, max-age=60' })
+  } catch (e) {
+    console.error(`api ${c.req.path}: ${cause(e)}`)
+    return c.json({ error: 'unavailable' }, 500)
+  }
+}
+
 export function createApp(fetcher: typeof fetch = fetch) {
   const app = new Hono<{ Bindings: Bindings }>()
 
@@ -66,6 +81,15 @@ export function createApp(fetcher: typeof fetch = fetch) {
     }
     return c.body(null, 200)
   })
+
+  // El canal sale de la misma variable que usa el bot: el snapshot se arma sin las variables del Worker.
+  app.get('/api/home', (c) =>
+    snapshot(c, 'home', (json) => `{"channel":${JSON.stringify(c.env.CHANNEL_LINK || null)},"snapshot":${json}}`),
+  )
+  app.get('/api/races/:season{[0-9]+}/:round{[0-9]+}', (c) =>
+    snapshot(c, `race:${c.req.param('season')}:${c.req.param('round')}`),
+  )
+  app.all('/api/*', (c) => c.json({ error: 'not_found' }, 404))
 
   return app
 }
