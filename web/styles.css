@@ -1,0 +1,59 @@
+/* Estilo "Pit wall" (spec §6.4). Referencia: opción A de docs/mockups/estilos.html. */
+@import 'tailwindcss';
+@import '@fontsource-variable/archivo/wdth.css';
+@import '@fontsource-variable/archivo/wdth-italic.css';
+
+@theme {
+  --color-carbon: #15151e;
+  --color-panel: #22222e;
+  --color-line: #2d2d3b;
+  --color-ink: #f3f3f7;
+  --color-muted: #9c9cb0;
+  --color-accent: #ee2b3b;
+  --color-fastest: #b455ff;
+  --font-sans: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Títulos de GP y nombre del sitio. */
+@utility title-gp {
+  font-weight: 900;
+  font-style: italic;
+  font-stretch: 62%;
+  line-height: 0.95;
+}
+/* Códigos de piloto, puntos y números grandes. */
+@utility condensed {
+  font-weight: 800;
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+}
+/* El paralelogramo de las posiciones y del botón. */
+@utility slant {
+  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    background: var(--color-carbon);
+    color: var(--color-ink);
+  }
+  body {
+    font-variant-numeric: tabular-nums;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+  /* El recorte del paralelogramo taparía el foco de afuera. */
+  .slant:focus-visible {
+    outline-offset: -4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation: none !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
