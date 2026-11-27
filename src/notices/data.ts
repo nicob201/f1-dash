@@ -25,3 +25,13 @@ export const resultsOf = (d: SeasonData, round: number, kind: ResultKind): Resul
 
 export const standingsOf = (d: SeasonData, round: number, kind: StandingRow['kind']): StandingRow[] =>
   d.standings.filter((s) => s.round === round && s.kind === kind).sort(byPosition)
+
+export const driverCode = (d: SeasonData, driverId: string): string =>
+  d.drivers.find((x) => x.driverId === driverId)?.code ?? driverId.slice(0, 3).toUpperCase()
+
+/** La última ronda con las dos tablas: con una sola, la otra saldría vacía. */
+export function lastCompleteStandingsRound(d: SeasonData): number | null {
+  const has = (round: number, kind: StandingRow['kind']) => d.standings.some((s) => s.round === round && s.kind === kind)
+  const rounds = d.standings.map((s) => s.round).filter((r) => has(r, 'drivers') && has(r, 'constructors'))
+  return rounds.length ? Math.max(...rounds) : null
+}

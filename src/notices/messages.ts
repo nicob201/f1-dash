@@ -1,8 +1,8 @@
 // Textos de los avisos del canal, para parse_mode HTML. Las tablas van en <pre> y no pasan de 32 columnas.
 import { decidedAt } from '../champion'
-import { arDay, arTime, escapeHtml, gpName, sessionLabel, teamName } from '../format/es'
+import { arDay, arTime, escapeHtml, finishingLabel, gpName, sessionLabel, teamName } from '../format/es'
 import type { ResultRow, StandingRow } from '../types'
-import { raceOf, resultsOf, standingsOf, type SeasonData } from './data'
+import { driverCode, raceOf, resultsOf, standingsOf, type SeasonData } from './data'
 
 // Con "lenguaje", Telegram pone una barra con ese título: ahí va su botón de copiar y no tapa datos.
 // El título es una sola palabra sin acentos.
@@ -11,21 +11,14 @@ const pre = (title: string, lines: string[]) =>
 const name = (d: SeasonData, round: number) => gpName(raceOf(d, round).name)
 const gp = (d: SeasonData, round: number) => escapeHtml(name(d, round).gp)
 
-const code = (d: SeasonData, driverId: string) =>
-  d.drivers.find((x) => x.driverId === driverId)?.code ?? driverId.slice(0, 3).toUpperCase()
 const team = (d: SeasonData, constructorId: string) =>
   teamName(d.constructors.find((x) => x.constructorId === constructorId)?.name ?? constructorId)
 
 const place = (position: number | null) => String(position ?? '—').padStart(2)
-// positionText de Jolpica cuando no es un puesto; los demás (R, N, F) salen como NC.
-const NOT_PLACED: Record<string, string> = { W: 'NL', D: 'DSQ', E: 'DSQ' }
-const finishing = (r: ResultRow) =>
-  r.positionText === null || /^\d+$/.test(r.positionText) ? String(r.position ?? '—') : (NOT_PLACED[r.positionText] ?? 'NC')
-
 /** La columna de puesto de una tabla de resultados; si hay un DSQ se ensancha para todas las filas. */
 function finishingColumn(rows: ResultRow[]): (r: ResultRow) => string {
-  const width = Math.max(2, ...rows.map((r) => finishing(r).length))
-  return (r) => finishing(r).padStart(width)
+  const width = Math.max(2, ...rows.map((r) => finishingLabel(r).length))
+  return (r) => finishingLabel(r).padStart(width)
 }
 
 const row = (position: string, driver: string, teamLabel: string, extra = '') =>
@@ -53,7 +46,7 @@ export function qualiMessage(d: SeasonData, round: number, kind: 'quali' | 'spri
   const results = resultsOf(d, round, kind)
   const column = finishingColumn(results)
   const lines = results.map((r) =>
-    row(column(r), code(d, r.driverId), team(d, r.constructorId), `  ${r.q3 ?? r.q2 ?? r.q1 ?? '—'}`),
+    row(column(r), driverCode(d, r.driverId), team(d, r.constructorId), `  ${r.q3 ?? r.q2 ?? r.q1 ?? '—'}`),
   )
   return `⏱️ <b>${gp(d, round)}: ${title}</b>\n\n${pre('Tiempos', lines)}`
 }
@@ -70,7 +63,7 @@ export function startMessage(d: SeasonData, round: number, kind: 'race' | 'sprin
   const lines = grid.map((g) => {
     // Primero cómo corrió este fin de semana; si no, el piloto con ese número.
     const who = quali.find((r) => r.carNumber === g.carNumber) ?? d.drivers.find((x) => x.carNumber === g.carNumber)
-    return who ? row(place(g.position), code(d, who.driverId), team(d, who.constructorId)) : `${place(g.position)} #${g.carNumber}`
+    return who ? row(place(g.position), driverCode(d, who.driverId), team(d, who.constructorId)) : `${place(g.position)} #${g.carNumber}`
   })
   const note = official.length ? '' : '\nOrden según la clasificación; puede cambiar por penalizaciones.'
   return `${title}\n\nGrilla de salida\n${pre('Grilla', lines)}${note}`
@@ -79,7 +72,7 @@ export function startMessage(d: SeasonData, round: number, kind: 'race' | 'sprin
 function scoreRows(d: SeasonData, results: ResultRow[]): string[] {
   const column = finishingColumn(results)
   return results.map((r) =>
-    row(column(r), code(d, r.driverId), team(d, r.constructorId), r.points ? `  ${String(r.points).padStart(2)}` : ''),
+    row(column(r), driverCode(d, r.driverId), team(d, r.constructorId), r.points ? `  ${String(r.points).padStart(2)}` : ''),
   )
 }
 
@@ -90,7 +83,7 @@ export const sprintResultMessage = (d: SeasonData, round: number): string =>
 export function raceTop(d: SeasonData, round: number): string {
   const results = resultsOf(d, round, 'race')
   const fastest = results.find((r) => r.fastestLapRank === 1)
-  const lap = fastest?.fastestLapTime ? `\nVuelta rápida: ${escapeHtml(code(d, fastest.driverId))}, ${escapeHtml(fastest.fastestLapTime)}` : ''
+  const lap = fastest?.fastestLapTime ? `\nVuelta rápida: ${escapeHtml(driverCode(d, fastest.driverId))}, ${escapeHtml(fastest.fastestLapTime)}` : ''
   return pre('Carrera', scoreRows(d, results.slice(0, 10))) + lap
 }
 
@@ -105,7 +98,7 @@ export function standingsBlocks(d: SeasonData, round: number, withGains: boolean
   }
   const drivers = standingsOf(d, round, 'drivers')
     .slice(0, 10)
-    .map((s) => `${place(s.position)} ${code(d, s.entityId)}  ${String(s.points).padStart(3)}${gain(s)}`)
+    .map((s) => `${place(s.position)} ${driverCode(d, s.entityId)}  ${String(s.points).padStart(3)}${gain(s)}`)
   const constructors = standingsOf(d, round, 'constructors').map(
     (s) => `${place(s.position)} ${team(d, s.entityId).padEnd(12)}  ${String(s.points).padStart(3)}${gain(s)}`,
   )

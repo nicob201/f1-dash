@@ -1,5 +1,5 @@
 // Nombres y fechas como salen en los mensajes. Jolpica manda todo en inglés.
-import type { SessionKind } from '../types'
+import type { ResultRow, SessionKind } from '../types'
 
 // clave: raceName sin " Grand Prix" → [cómo se llama el GP, dónde se corre]
 const GP: Record<string, [string, string]> = {
@@ -92,6 +92,17 @@ export function arDay(d: Date): string {
   return `${WEEKDAYS[new Date(Date.UTC(year, month - 1, day)).getUTCDay()]} ${day}`
 }
 export const arTime = (d: Date): string => parts(d).time
+
+const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+export function arDate(d: Date): string {
+  const { month, day } = parts(d)
+  return `${day} ${MONTHS[month - 1]}`
+}
+
+// positionText de Jolpica cuando no es un puesto; los demás (R, N, F) salen como NC.
+const NOT_PLACED: Record<string, string> = { W: 'NL', D: 'DSQ', E: 'DSQ' }
+export const finishingLabel = (r: Pick<ResultRow, 'position' | 'positionText'>): string =>
+  r.positionText === null || /^\d+$/.test(r.positionText) ? String(r.position ?? '—') : (NOT_PLACED[r.positionText] ?? 'NC')
 
 /** 10:00 en Argentina del día anterior a la práctica libre 1. */
 export function previewAt(fp1: Date): Date {

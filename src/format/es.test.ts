@@ -1,6 +1,6 @@
 import calendar from '../sources/__fixtures__/calendar-2026.json'
 import { parseCalendar } from '../sources/jolpica'
-import { arDay, arTime, escapeHtml, gpName, previewAt, sessionLabel, teamName } from './es'
+import { arDate, arDay, arTime, escapeHtml, gpName, previewAt, sessionLabel, teamName } from './es'
 
 const { races } = parseCalendar(calendar)
 
@@ -43,4 +43,9 @@ it('previa: 10:00 del día argentino anterior a FP1', () => {
 })
 it('escapa HTML', () => {
   expect(escapeHtml('a<b>&c')).toBe('a&lt;b&gt;&amp;c')
+})
+
+it('arDate: día y mes en hora argentina', () => {
+  expect(arDate(new Date('2026-11-29T16:00:00Z'))).toBe('29 nov')
+  expect(arDate(new Date('2026-12-01T01:00:00Z'))).toBe('30 nov')
 })

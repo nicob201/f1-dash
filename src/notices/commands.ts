@@ -1,6 +1,6 @@
 // Respuestas del bot por privado. Leen solo lo que ya está en la base.
 import { escapeHtml, gpName } from '../format/es'
-import { raceOf, type SeasonData } from './data'
+import { lastCompleteStandingsRound, raceOf, type SeasonData } from './data'
 import { eventDetail, raceTop, standingsBlocks } from './messages'
 
 /** `channel: null` mientras el canal no esté abierto. */
@@ -34,9 +34,7 @@ function last(d: SeasonData): string {
 }
 
 function championship(d: SeasonData): string {
-  const has = (round: number, kind: 'drivers' | 'constructors') => d.standings.some((s) => s.round === round && s.kind === kind)
-  // Con una sola de las dos tablas, la otra saldría vacía.
-  const round = lastRound(d.standings.filter((s) => has(s.round, 'drivers') && has(s.round, 'constructors')))
+  const round = lastCompleteStandingsRound(d)
   return round === null ? NO_RACES : standingsBlocks(d, round, false)
 }
 
