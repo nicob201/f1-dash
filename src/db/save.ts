@@ -4,7 +4,7 @@ import type { BatchItem } from 'drizzle-orm/batch'
 import type { DrizzleD1Database } from 'drizzle-orm/d1'
 import type { SQLiteColumn, SQLiteTable } from 'drizzle-orm/sqlite-core'
 import type { GridRow, ParsedResults, PitStopRow, RaceRow, SessionRow, StandingRow } from '../types'
-import { constructors, drivers, grids, pitStops, races, results, sessions, standings } from './schema'
+import { constructors, drivers, grids, kv, pitStops, races, results, sessions, standings } from './schema'
 
 export type Db = DrizzleD1Database
 
@@ -79,4 +79,8 @@ export async function savePitStops(db: Db, rows: PitStopRow[]): Promise<void> {
 
 export async function saveGrid(db: Db, rows: GridRow[]): Promise<void> {
   await run(db, replace(db, grids, rows, (r) => [[grids.season, r.season], [grids.round, r.round], [grids.kind, r.kind]]))
+}
+
+export async function saveSnapshots(db: Db, rows: { key: string; value: string }[]): Promise<void> {
+  await run(db, upsert(db, kv, [kv.key], rows))
 }

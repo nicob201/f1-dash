@@ -84,3 +84,9 @@ export const grids = sqliteTable('grids', {
   position: integer().notNull(),
   source: text().$type<GridRow['source']>().notNull(),
 }, (t) => [primaryKey({ columns: [t.season, t.round, t.kind, t.carNumber] })])
+
+// Los JSON de la web, ya armados: la API devuelve la fila tal cual.
+export const kv = sqliteTable('kv', {
+  key: text().primaryKey(),
+  value: text().notNull(),
+})

@@ -2,13 +2,13 @@
 //      npm run seed -- --remote  en la D1 de Cloudflare
 // Se puede volver a correr. Son unos 80 pedidos a Jolpica; si responde 429, espera y sigue.
 import { setTimeout as sleep } from 'node:timers/promises'
-import { drizzle } from 'drizzle-orm/d1'
-import { getPlatformProxy } from 'wrangler'
 import { saveCalendar, savePitStops, saveResults, saveStandings } from '../src/db/save'
 import { fetchAllPages, fetchJson, retrying429 } from '../src/sources/http'
 import { mergeResults, parseCalendar, parsePitStops, parseQualifying, parseResults, parseStandings } from '../src/sources/jolpica'
 import { matchSessionKeys, parseSessionResult, parseSessions, sprintQualiRows } from '../src/sources/openf1'
+import { buildSnapshots } from '../src/snapshots/refresh'
 import type { ParsedResults } from '../src/types'
+import { openDb } from './db'
 
 const SEASON = 2026
 const JOLPICA = `https://api.jolpi.ca/ergast/f1/${SEASON}`
@@ -37,13 +37,9 @@ async function openf1(path: string): Promise<unknown> {
 const season = async (path: string, parse: (body: unknown) => ParsedResults) => mergeResults((await pages(path)).map(parse))
 
 const remote = process.argv.includes('--remote')
-const platform = await getPlatformProxy<{ DB: D1Database }>({
-  configPath: remote ? 'wrangler.seed.jsonc' : 'wrangler.jsonc',
-  remoteBindings: remote,
-})
+const { db, dispose } = await openDb(remote)
 
 try {
-  const db = drizzle(platform.env.DB)
   console.log(`Cargando ${SEASON} en la base ${remote ? 'remota' : 'local'}`)
 
   const [calendarBody] = await pages('')
@@ -86,7 +82,8 @@ try {
     await savePitStops(db, (await pages(`/${round}/pitstops`)).flatMap(parsePitStops))
     console.log(`Tablas y paradas, ronda ${round}`)
   }
+  console.log(`Snapshots de la web: ${await buildSnapshots(db)}`)
   console.log('Listo')
 } finally {
-  await platform.dispose()
+  await dispose()
 }
