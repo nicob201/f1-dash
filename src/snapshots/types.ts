@@ -6,7 +6,15 @@ export type SessionTime = { kind: SessionKind; startsAt: string } // ISO, UTC
 export type RaceInfo = { season: number; round: number; rounds: number; gp: string; circuit: string; sessions: SessionTime[] }
 
 export type FastestLap = DriverRef & { lap: string }
-export type ResultLine = DriverRef & { finish: string; time: string | null; points: number; gained: number | null; fastest: boolean }
+export type ResultLine = DriverRef & {
+  finish: string
+  time: string | null
+  /** Se muestra cuando no hay tiempo. */
+  note: string | null
+  points: number
+  gained: number | null
+  fastest: boolean
+}
 export type QualiLine = DriverRef & { finish: string; q1: string | null; q2: string | null; q3: string | null }
 export type PitLine = DriverRef & { stop: number; lap: number; duration: string | null }
 export type DriverStanding = DriverRef & { position: number | null; points: number }

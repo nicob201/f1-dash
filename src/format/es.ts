@@ -99,6 +99,16 @@ export function arDate(d: Date): string {
   return `${day} ${MONTHS[month - 1]}`
 }
 
+// Por qué un resultado no tiene tiempo. Un estado que no conocemos no se muestra en inglés.
+const STATUS: Record<string, string> = {
+  Retired: 'Abandono',
+  'Did not start': 'No largó',
+  Disqualified: 'Descalificado',
+  Lapped: 'Doblado',
+}
+export const statusLabel = (status: string | null): string | null =>
+  status !== null && Object.hasOwn(STATUS, status) ? STATUS[status]! : null
+
 // positionText de Jolpica cuando no es un puesto; los demás (R, N, F) salen como NC.
 const NOT_PLACED: Record<string, string> = { W: 'NL', D: 'DSQ', E: 'DSQ' }
 export const finishingLabel = (r: Pick<ResultRow, 'position' | 'positionText'>): string =>

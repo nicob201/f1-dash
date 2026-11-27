@@ -1,6 +1,6 @@
 import calendar from '../sources/__fixtures__/calendar-2026.json'
 import { parseCalendar } from '../sources/jolpica'
-import { arDate, arDay, arTime, escapeHtml, gpName, previewAt, sessionLabel, teamName } from './es'
+import { arDate, arDay, arTime, escapeHtml, gpName, previewAt, sessionLabel, statusLabel, teamName } from './es'
 
 const { races } = parseCalendar(calendar)
 
@@ -48,4 +48,11 @@ it('escapa HTML', () => {
 it('arDate: día y mes en hora argentina', () => {
   expect(arDate(new Date('2026-11-29T16:00:00Z'))).toBe('29 nov')
   expect(arDate(new Date('2026-12-01T01:00:00Z'))).toBe('30 nov')
+})
+
+it('statusLabel: los estados de Jolpica que dejan sin tiempo; los demás, nada', () => {
+  expect(['Retired', 'Did not start', 'Disqualified', 'Lapped'].map(statusLabel)).toEqual([
+    'Abandono', 'No largó', 'Descalificado', 'Doblado',
+  ])
+  expect(['Finished', 'Something new', 'constructor', null].map(statusLabel)).toEqual([null, null, null, null])
 })

@@ -68,6 +68,10 @@ describe('raceSnapshot', () => {
     expect(codes(vegas.race.filter((l) => l.fastest))).toEqual(['LAW'])
     expect(vegas.fastest).toMatchObject({ code: 'LAW', lap: '1:35.591' })
   })
+  it('quien no tiene tiempo lleva el motivo en castellano', () => {
+    expect(['ALO', 'LIN', 'ALB'].map((c) => line(c).note)).toEqual(['Abandono', 'Abandono', 'No largó'])
+    expect(line('VER').note).toBeNull()
+  })
   it('clasificación, navegación y secciones vacías', () => {
     expect(vegas.quali).toHaveLength(22)
     expect(vegas.quali[0]).toMatchObject({ code: 'ANT', finish: '1', q3: '1:33.893' })

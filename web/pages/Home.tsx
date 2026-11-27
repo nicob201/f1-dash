@@ -75,7 +75,7 @@ function Last({ season, last }: { season: number; last: NonNullable<HomeSnapshot
               <DriverTag color={line.color} label={line.code} title={line.team} />
             </span>
             <span className="min-w-0 grow truncate text-[13px] text-muted">{line.name}</span>
-            <span className="text-sm">{line.time ?? '—'}</span>
+            <span className="text-sm">{line.time ?? line.note ?? '—'}</span>
           </li>
         ))}
       </ol>

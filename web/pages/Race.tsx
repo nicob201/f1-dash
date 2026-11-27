@@ -94,11 +94,11 @@ const time: Column<ResultLine> = {
   cell: (r) =>
     r.fastest ? (
       <span className="font-bold text-fastest" title="Vuelta rápida">
-        {r.time ?? '—'}
+        {r.time ?? r.note ?? '—'}
         <span className="sr-only"> (vuelta rápida)</span>
       </span>
     ) : (
-      (r.time ?? '—')
+      (r.time ?? r.note ?? '—')
     ),
   className: RIGHT,
 }

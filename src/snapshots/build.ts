@@ -1,6 +1,6 @@
 // Arma los JSON de la web. Funciones puras: lo que depende de la hora lo decide el navegador.
 import { teamColor } from '../colors'
-import { finishingLabel, gpName, teamName } from '../format/es'
+import { finishingLabel, gpName, statusLabel, teamName } from '../format/es'
 import { driverCode, lastCompleteStandingsRound, raceOf, resultsOf, standingsOf, type SeasonData } from '../notices/data'
 import type { PitStopRow, ResultRow } from '../types'
 import type { DriverRef, FastestLap, HomeSnapshot, RaceInfo, RaceSnapshot, ResultLine } from './types'
@@ -50,6 +50,7 @@ const resultLine = (d: SeasonData, r: ResultRow): ResultLine => ({
   ...driverRef(d, r.driverId, r.constructorId),
   finish: finishingLabel(r),
   time: r.time,
+  note: statusLabel(r.status),
   points: r.points ?? 0,
   gained: r.kind === 'race' ? placesGained(r.grid, r.position, r.positionText) : null,
   fastest: r.kind === 'race' && r.fastestLapRank === 1,
