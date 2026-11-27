@@ -1,8 +1,9 @@
 // El marco: encabezado, la pantalla de cada ruta y el pie.
 import type { HomeResponse } from '../src/snapshots/types'
 import { channelUrl, matchRoute, type Route } from './lib'
+import { Home } from './pages/Home'
 import { usePathname } from './router'
-import { Link, NotFound, useJson, type Fetched } from './ui'
+import { Async, Link, NotFound, useJson, type Fetched } from './ui'
 
 function Nav({ route }: { route: Route }) {
   const items = [
@@ -47,13 +48,13 @@ function Header({ route, home }: { route: Route; home: Fetched<HomeResponse> }) 
 export function App() {
   const route = matchRoute(usePathname())
   // Se pide una sola vez: lo usan el encabezado, el inicio y la lista de carreras.
-  const [home] = useJson<HomeResponse>('/api/home')
+  const [home, retry] = useJson<HomeResponse>('/api/home')
 
   return (
     <div className="flex min-h-screen flex-col">
       <Header route={route} home={home} />
       <main className="mx-auto w-full max-w-6xl grow">
-        <Page route={route} />
+        <Page route={route} home={home} retry={retry} />
       </main>
       <footer className="border-t border-line px-6 py-6 text-center text-xs text-muted">
         <p>Proyecto de un fan. No es un sitio oficial de la Fórmula 1.</p>
@@ -63,6 +64,13 @@ export function App() {
   )
 }
 
-function Page({ route }: { route: Route }) {
+function Page({ route, home, retry }: { route: Route; home: Fetched<HomeResponse>; retry: () => void }) {
+  if (route.page === 'home') {
+    return (
+      <Async state={home} retry={retry} missing={<NotFound text="Todavía no hay datos cargados." />}>
+        {({ snapshot }) => <Home home={snapshot} />}
+      </Async>
+    )
+  }
   return route.page === 'notFound' ? <NotFound /> : null
 }

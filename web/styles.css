@@ -20,6 +20,8 @@
   font-style: italic;
   font-stretch: 62%;
   line-height: 0.95;
+  /* Condensada e itálica, las palabras se pegan. */
+  word-spacing: 0.08em;
 }
 /* Códigos de piloto, puntos y números grandes. */
 @utility condensed {

@@ -1,5 +1,7 @@
 // Piezas que comparten las pantallas.
 import { useEffect, useState, type ComponentProps, type ReactNode } from 'react'
+import { arDay, arTime, sessionLabel } from '../src/format/es'
+import type { FastestLap, SessionTime } from '../src/snapshots/types'
 import { loadJson, type Loaded } from './lib'
 import { navigate } from './router'
 
@@ -52,6 +54,40 @@ export const DriverTag = ({ color, label, title }: { color: string; label: strin
     <span aria-hidden className="h-5 w-1.5 -skew-x-12" style={{ background: color }} />
     <span className="condensed text-lg tracking-wide">{label}</span>
   </span>
+)
+
+export const FastestNote = ({ fastest }: { fastest: FastestLap }) => (
+  <p className="mt-3 text-[13px] text-muted">
+    Vuelta rápida:{' '}
+    <b className="font-bold text-fastest">
+      {fastest.code}, {fastest.lap}
+    </b>
+  </p>
+)
+
+/** Los horarios del fin de semana, en hora argentina. */
+export const Schedule = ({ sessions }: { sessions: SessionTime[] }) => (
+  <>
+    <table className="w-full text-sm">
+      <caption className="sr-only">Horarios del fin de semana</caption>
+      <tbody>
+        {sessions.map((s) => {
+          const start = new Date(s.startsAt)
+          const race = s.kind === 'race'
+          return (
+            <tr key={s.kind} className={`border-t border-line ${race ? 'font-extrabold' : ''}`}>
+              <td className={`py-2 ${race ? 'pl-2.5 shadow-[inset_3px_0_0_var(--color-accent)]' : 'text-muted'}`}>
+                {arDay(start)}
+              </td>
+              <td className="py-2">{sessionLabel(s.kind)}</td>
+              <td className="py-2 text-right">{arTime(start)}</td>
+            </tr>
+          )
+        })}
+      </tbody>
+    </table>
+    <p className="mt-2 text-xs text-muted">Horarios de Argentina</p>
+  </>
 )
 
 const Message = ({ children }: { children: ReactNode }) => (
