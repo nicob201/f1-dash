@@ -2,6 +2,8 @@
 import type { HomeResponse } from '../src/snapshots/types'
 import { channelUrl, matchRoute, type Route } from './lib'
 import { Home } from './pages/Home'
+import { Race } from './pages/Race'
+import { Races } from './pages/Races'
 import { usePathname } from './router'
 import { Async, Link, NotFound, useJson, type Fetched } from './ui'
 
@@ -65,12 +67,12 @@ export function App() {
 }
 
 function Page({ route, home, retry }: { route: Route; home: Fetched<HomeResponse>; retry: () => void }) {
-  if (route.page === 'home') {
-    return (
-      <Async state={home} retry={retry} missing={<NotFound text="Todavía no hay datos cargados." />}>
-        {({ snapshot }) => <Home home={snapshot} />}
-      </Async>
-    )
-  }
-  return route.page === 'notFound' ? <NotFound /> : null
+  if (route.page === 'notFound') return <NotFound />
+  if (route.page === 'race') return <Race season={route.season} round={route.round} />
+  const Screen = route.page === 'home' ? Home : Races
+  return (
+    <Async state={home} retry={retry} missing={<NotFound text="Todavía no hay datos cargados." />}>
+      {({ snapshot }) => <Screen home={snapshot} />}
+    </Async>
+  )
 }
