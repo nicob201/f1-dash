@@ -273,6 +273,8 @@ Un Worker con Hono. Las respuestas son `GET` públicos y nunca consultan las fue
 - `GET /api/home`: inicio, campeonatos y stats de la temporada en curso.
 - `GET /api/races/:season/:round`: el detalle de una carrera.
 
+*(2026-11-27: mientras no exista el reloj, los snapshots los arma la carga de datos. Se arman con funciones de TypeScript, no con SQL. Ver `docs/superpowers/specs/2026-11-27-web-entrega-1-design.md`, §5.1.)*
+
 **Decisión de Claude: snapshots precalculados.** Cuando el reloj guarda datos nuevos, arma el JSON de cada endpoint con SQL (KPIs, duelos, puntos acumulados) y lo guarda en `kv`. La API lee una sola fila. Las razones:
 
 - Los datos cambian pocas veces por fin de semana.

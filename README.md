@@ -7,17 +7,20 @@ Proyecto de un fan. No es un sitio oficial de la Fórmula 1. Datos: Jolpica y Op
 - Diseño: `docs/2026-11-25-f1-dash-design.md`
 - Planes: `docs/superpowers/plans/`
 
-**Estado:** el bot contesta `/proxima`, `/ultima` y `/campeonato` por privado. Faltan el reloj (descarga de datos y publicación en el canal) y la web. Mientras no esté el reloj, los datos se actualizan a mano con `npm run seed -- --remote`.
+**Estado:** el bot contesta `/proxima`, `/ultima` y `/campeonato` por privado. La web tiene el inicio y las carreras; faltan el campeonato, las stats y el reloj (descarga de datos y publicación en el canal). Mientras no esté el reloj, los datos se actualizan a mano con `npm run seed -- --remote`.
 
 ## Comandos
 
 ```bash
 npm install
+npm run dev              # la web y la API con la D1 local, en http://localhost:5173
+npm run build            # compila el front y el Worker en dist/
 npm test                 # parsers con respuestas reales y guardado contra una D1 local
 npm run typecheck
 npx wrangler d1 migrations apply f1-dash --local
 npm run seed             # carga la temporada 2026 en la base local (tarda unos minutos)
 npm run seed -- --remote # en la base de Cloudflare (ver abajo)
+npm run snapshots        # rearma los datos de la web sin descargar nada (también con -- --remote)
 npm run avisos -- race-result 21  # muestra un mensaje armado con la base local
 npm run avisos -- --mi-chat       # id de tu chat privado con el bot
 npm run avisos -- race-result 21 --enviar  # te lo manda a ese chat
@@ -30,10 +33,13 @@ El Worker y la base D1 `f1-dash` ya están en Cloudflare (el `database_id` está
 
 ```bash
 npx wrangler d1 migrations apply f1-dash --remote   # si hay migraciones nuevas
-npx wrangler deploy
+npm run snapshots -- --remote                       # si cambió la forma de los datos de la web
+npm run deploy                                      # compila y despliega
 ```
 
-Los secretos del Worker (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`) se cargan con `npx wrangler secret put`. Para que `/start` muestre el canal o la web: variables `CHANNEL_LINK` y `WEB_URL`.
+Desplegar siempre con `npm run deploy`: `wrangler deploy` a secas publica el último build. `dist/` tiene una copia de `.dev.vars` y está ignorado por git.
+
+Los secretos del Worker (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`) se cargan con `npx wrangler secret put`. Para que `/start` muestre el canal o la web: `CHANNEL_LINK` y `WEB_URL` en `vars` de `wrangler.jsonc` (lo cargado solo en el panel de Cloudflare lo borra el próximo deploy). `CHANNEL_LINK` también muestra el botón de Telegram en la web: `@canal` o un enlace `https://t.me/…`.
 
 Para enviar, `.dev.vars` (ignorado por git) necesita `TELEGRAM_BOT_TOKEN` y `ADMIN_CHAT_ID`. `--enviar` se niega a mandar a un canal o grupo.
 
