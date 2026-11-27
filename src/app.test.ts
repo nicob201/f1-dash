@@ -91,6 +91,16 @@ describe('respuestas', () => {
   })
 })
 
+describe('log', () => {
+  // wrangler tail da la CPU de cada pedido; esta línea dice de qué comando es.
+  it('anota el comando y nada de lo que escribió el usuario', async () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+    await post(message('/Ultima@F1DashArBot dato privado'))
+    await post(message('texto privado'))
+    expect(log.mock.calls).toEqual([['bot /ultima'], ['bot help']])
+  })
+})
+
 describe('fallas', () => {
   // Falla al ejecutar, como una caída real: ahí Drizzle envuelve el error y su mensaje es el SQL.
   const down = async () => { throw new Error('D1_ERROR: D1 caída') }

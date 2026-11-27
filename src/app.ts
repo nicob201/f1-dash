@@ -50,6 +50,8 @@ export function createApp(fetcher: typeof fetch = fetch) {
     if (chat.type !== 'private') return c.body(null, 200)
 
     const command = parseCommand(text ?? '')
+    // Con wrangler tail, atribuye la CPU de cada pedido. Solo el comando: nunca el chat ni el texto.
+    console.log(`bot ${command}`)
     try {
       const now = new Date()
       const data = await loadForCommand(drizzle(c.env.DB), command, now)
