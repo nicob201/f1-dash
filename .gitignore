@@ -6,3 +6,4 @@ node_modules/
 medicion/
 .DS_Store
 worker-configuration.d.ts
+dist/
