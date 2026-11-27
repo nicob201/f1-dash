@@ -24,6 +24,8 @@ export type HomeSnapshot = {
   season: number
   races: (RaceInfo & { winner: DriverRef | null })[]
   last: { round: number; gp: string; top: ResultLine[]; fastest: FastestLap | null } | null
+  /** La ronda tras la que quedaron las dos tablas. */
+  standingsRound: number | null
   drivers: DriverStanding[]
   constructors: TeamStanding[]
   /** La temporada siguiente, para la cuenta regresiva cuando termina la actual. Puede venir vacía. */

@@ -1,5 +1,5 @@
 // Única puerta de escritura a D1. Cada función escribe en un solo batch, que es atómico.
-import { and, eq, getTableColumns, sql, type SQL } from 'drizzle-orm'
+import { and, eq, getTableColumns, like, sql, type SQL } from 'drizzle-orm'
 import type { BatchItem } from 'drizzle-orm/batch'
 import type { DrizzleD1Database } from 'drizzle-orm/d1'
 import type { SQLiteColumn, SQLiteTable } from 'drizzle-orm/sqlite-core'
@@ -46,9 +46,20 @@ function replace<T extends SQLiteTable, R extends T['$inferInsert']>(
   ]
 }
 
-// ponytail: el calendario solo agrega y actualiza; si la fuente quita una sesión, queda. Borrarlas cuando pase.
+/** Por cada temporada presente en `rows`, borra de `table` lo que no vino. Una lista vacía no borra nada. */
+function prune<R extends { season: number }>(db: Db, table: typeof races | typeof sessions, rows: R[], key: SQL, id: (r: R) => string) {
+  return [...new Set(rows.map((r) => r.season))].map((season) => {
+    // La lista va en un solo parámetro: D1 admite 100 por query.
+    const kept = JSON.stringify(rows.filter((r) => r.season === season).map(id))
+    return db.delete(table).where(and(eq(table.season, season), sql`${key} not in (select value from json_each(${kept}))`))
+  })
+}
+
 export async function saveCalendar(db: Db, raceRows: RaceRow[], sessionRows: SessionRow[]): Promise<void> {
   await run(db, [
+    // Una ronda cancelada o una sesión que se saca no pueden quedar guardadas.
+    ...prune(db, races, raceRows, sql`cast(${races.round} as text)`, (r) => String(r.round)),
+    ...prune(db, sessions, sessionRows, sql`${sessions.round} || ':' || ${sessions.kind}`, (s) => `${s.round}:${s.kind}`),
     ...upsert(db, races, [races.season, races.round], raceRows),
     ...upsert(db, sessions, [sessions.season, sessions.round, sessions.kind], sessionRows, {
       ...incoming(sessions),
@@ -81,6 +92,13 @@ export async function saveGrid(db: Db, rows: GridRow[]): Promise<void> {
   await run(db, replace(db, grids, rows, (r) => [[grids.season, r.season], [grids.round, r.round], [grids.kind, r.kind]]))
 }
 
-export async function saveSnapshots(db: Db, rows: { key: string; value: string }[]): Promise<void> {
-  await run(db, upsert(db, kv, [kv.key], rows))
+/** Guarda los snapshots y borra las páginas de carrera de `seasons` que no vinieron, todo junto. */
+export async function saveSnapshots(db: Db, rows: { key: string; value: string }[], seasons: number[]): Promise<void> {
+  const kept = JSON.stringify(rows.map((r) => r.key))
+  await run(db, [
+    ...seasons.map((season) =>
+      db.delete(kv).where(and(like(kv.key, `race:${season}:%`), sql`${kv.key} not in (select value from json_each(${kept}))`)),
+    ),
+    ...upsert(db, kv, [kv.key], rows),
+  ])
 }

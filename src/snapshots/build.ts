@@ -1,7 +1,7 @@
 // Arma los JSON de la web. Funciones puras: lo que depende de la hora lo decide el navegador.
 import { teamColor } from '../colors'
 import { finishingLabel, gpName, statusLabel, teamName } from '../format/es'
-import { driverCode, lastCompleteStandingsRound, raceOf, resultsOf, standingsOf, type SeasonData } from '../notices/data'
+import { driverCode, lastCompleteStandingsRound, lastRound, raceOf, resultsOf, standingsOf, type SeasonData } from '../notices/data'
 import type { PitStopRow, ResultRow } from '../types'
 import type { DriverRef, FastestLap, HomeSnapshot, RaceInfo, RaceSnapshot, ResultLine } from './types'
 
@@ -62,17 +62,16 @@ function fastestLap(d: SeasonData, results: ResultRow[]): FastestLap | null {
 }
 
 export function homeSnapshot(d: SeasonData, upcoming: Calendar): HomeSnapshot {
-  const run = d.results.filter((r) => r.kind === 'race').map((r) => r.round)
-  const lastRound = run.length ? Math.max(...run) : null
+  const latest = lastRound(d.results.filter((r) => r.kind === 'race'))
   const tables = lastCompleteStandingsRound(d)
   const table = (kind: 'drivers' | 'constructors') => (tables === null ? [] : standingsOf(d, tables, kind))
 
   let last: HomeSnapshot['last'] = null
-  if (lastRound !== null) {
-    const results = resultsOf(d, lastRound, 'race')
+  if (latest !== null) {
+    const results = resultsOf(d, latest, 'race')
     last = {
-      round: lastRound,
-      gp: gpName(raceOf(d, lastRound).name).gp,
+      round: latest,
+      gp: gpName(raceOf(d, latest).name).gp,
       top: results.slice(0, 5).map((r) => resultLine(d, r)),
       fastest: fastestLap(d, results),
     }
@@ -85,6 +84,7 @@ export function homeSnapshot(d: SeasonData, upcoming: Calendar): HomeSnapshot {
       return { ...info, winner: winner ? driverRef(d, winner.driverId, winner.constructorId) : null }
     }),
     last,
+    standingsRound: tables,
     drivers: table('drivers').slice(0, 4).map((s) => ({
       ...driverRef(d, s.entityId, currentTeam(d, s.entityId)), position: s.position, points: s.points,
     })),

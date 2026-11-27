@@ -34,7 +34,7 @@ describe('homeSnapshot', () => {
   })
   it('sin carreras corridas no hay última ni tablas', () => {
     const h = home({ ...d, results: [], standings: [] })
-    expect([h.last, h.drivers, h.constructors]).toEqual([null, [], []])
+    expect([h.last, h.drivers, h.constructors, h.standingsRound]).toEqual([null, [], [], null])
   })
   it('incluye las carreras de la temporada siguiente', () => {
     const race = { ...d.races[0]!, season: 2027 }
@@ -51,7 +51,7 @@ describe('homeSnapshot', () => {
   it('con una sola tabla de la ronda 22, el campeonato sigue en la 21', () => {
     const extra = d.standings.filter((s) => s.kind === 'drivers').map((s) => ({ ...s, round: 22, points: s.points + 25 }))
     const h = home({ ...d, standings: [...d.standings, ...extra] })
-    expect(h.drivers[0]!.points).toBe(402)
+    expect([h.drivers[0]!.points, h.standingsRound]).toEqual([402, 21])
   })
 })
 

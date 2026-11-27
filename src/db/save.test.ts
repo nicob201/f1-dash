@@ -74,6 +74,27 @@ it('el calendario actualiza un horario cambiado y guarda UTC en milisegundos', a
   await saveCalendar(db, cal.races, cal.sessions.map((s) => (s.round === 22 && s.kind === 'race' ? { ...s, startsAt: moved } : s)))
   expect(await count('sessions', `round = 22 and kind = 'race' and starts_at = ${moved.getTime()}`)).toBe(1)
 })
+it('lo que el calendario ya no trae se borra, solo en su temporada', async () => {
+  const cal = parseCalendar(calendar)
+  const old = <T extends { season: number }>(rows: T[]) => rows.map((r) => ({ ...r, season: 2025 }))
+  await saveCalendar(db, old(cal.races), old(cal.sessions))
+  await saveCalendar(db, cal.races, cal.sessions)
+  // La ronda 23 se cancela y la 22 pierde la práctica 3.
+  await saveCalendar(
+    db,
+    cal.races.filter((r) => r.round !== 23),
+    cal.sessions.filter((s) => s.round !== 23 && !(s.round === 22 && s.kind === 'fp3')),
+  )
+  expect([await count('races', 'season = 2026'), await count('sessions', 'season = 2026')]).toEqual([22, 109])
+  expect(await count('sessions', "season = 2026 and round = 22 and kind = 'fp3'")).toBe(0)
+  expect([await count('races', 'season = 2025'), await count('sessions', 'season = 2025')]).toEqual([23, 115])
+})
+it('un calendario sin sesiones no borra las que había', async () => {
+  const cal = parseCalendar(calendar)
+  await saveCalendar(db, cal.races, cal.sessions)
+  await saveCalendar(db, cal.races, [])
+  expect(await count('sessions')).toBe(115)
+})
 it('guarda una tabla con un piloto sin puesto', async () => {
   await saveStandings(db, parseStandings(drivers1, 'drivers'))
   expect([await count('standings'), await count('standings', 'position is null')]).toEqual([22, 1])

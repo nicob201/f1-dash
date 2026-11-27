@@ -165,7 +165,7 @@ describe('api de la web', () => {
     expect(await res.json()).toEqual({ channel, snapshot: JSON.parse(HOME) })
   })
   it.each([
-    '/api/races/2026/22', '/api/races/2026/0', '/api/races/2026/999', '/api/races/abc/1', '/api/races/2026', '/api/nada',
+    '/api/races/2026/22', '/api/races/2026/0', '/api/races/2026/999', '/api/races/abc/1', '/api/races/2026', '/api/nada', '/api',
   ])('%s → 404 en JSON, sin caché', async (path) => {
     const res = await get(path)
     expect([res.status, await res.json(), res.headers.get('cache-control')]).toEqual([404, { error: 'not_found' }, null])

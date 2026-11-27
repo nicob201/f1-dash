@@ -1,6 +1,6 @@
 // Respuestas del bot por privado. Leen solo lo que ya está en la base.
 import { escapeHtml, gpName } from '../format/es'
-import { lastCompleteStandingsRound, raceOf, type SeasonData } from './data'
+import { lastCompleteStandingsRound, lastRound, raceOf, type SeasonData } from './data'
 import { eventDetail, raceTop, standingsBlocks } from './messages'
 
 /** `channel: null` mientras el canal no esté abierto. */
@@ -10,7 +10,6 @@ const COMMANDS = '/proxima · próxima carrera\n/ultima · última carrera\n/cam
 const NO_RACES = 'Todavía no se corrió ninguna carrera.'
 
 const gp = (d: SeasonData, round: number) => escapeHtml(gpName(raceOf(d, round).name).gp)
-const lastRound = (rows: { round: number }[]) => (rows.length ? Math.max(...rows.map((r) => r.round)) : null)
 
 function welcome({ channel, webUrl }: Links): string {
   const web = webUrl ? `\n\n<a href="${escapeHtml(webUrl)}">Ver la web</a>` : ''
