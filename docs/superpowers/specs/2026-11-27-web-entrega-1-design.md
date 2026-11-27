@@ -1,7 +1,7 @@
 # Web, entrega 1: datos, API, Inicio y Carreras
 
 - **Fecha:** 2026-11-27
-- **Estado:** pendiente de aprobación del autor
+- **Estado:** aprobado por el autor el 2026-11-27
 - **Base:** `docs/2026-11-25-f1-dash-design.md` (en adelante, "el spec"). Lo que este documento no cambia, vale como está ahí. Lo marcado **(Claude)** es una decisión propia para que el autor la revise.
 
 ## 1. Qué es y para qué
