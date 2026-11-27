@@ -7,6 +7,6 @@
   "preview_urls": false,
   "observability": { "enabled": true },
   // El front lo compila Vite y el plugin pone la carpeta. /api y /telegram van siempre al Worker.
-  "assets": { "not_found_handling": "single-page-application", "run_worker_first": ["/api/*", "/telegram/*"] },
+  "assets": { "not_found_handling": "single-page-application", "run_worker_first": ["/api", "/api/*", "/telegram/*"] },
   "d1_databases": [{ "binding": "DB", "database_name": "f1-dash", "database_id": "aedfd615-d833-4de4-bacf-9d7eb25780f3", "migrations_dir": "drizzle" }]
 }

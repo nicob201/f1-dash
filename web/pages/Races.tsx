@@ -1,9 +1,10 @@
 // Todas las carreras de la temporada, corridas y por correr.
 import { arDate } from '../../src/format/es'
 import type { HomeSnapshot } from '../../src/snapshots/types'
-import { DriverTag, Link } from '../ui'
+import { DriverTag, Link, useTitle } from '../ui'
 
 export function Races({ home }: { home: HomeSnapshot }) {
+  useTitle('Carreras')
   return (
     <div className="mx-auto max-w-3xl px-6 py-6">
       <h1 className="title-gp mb-4 text-5xl">Carreras {home.season}</h1>

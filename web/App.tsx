@@ -1,4 +1,5 @@
 // El marco: encabezado, la pantalla de cada ruta y el pie.
+import { useEffect, useRef } from 'react'
 import type { HomeResponse } from '../src/snapshots/types'
 import { channelUrl, matchRoute, type Route } from './lib'
 import { Home } from './pages/Home'
@@ -38,7 +39,7 @@ function Header({ route, home }: { route: Route; home: Fetched<HomeResponse> }) 
         </Link>
         <Nav route={route} />
         {channel && (
-          <a href={channel} className="slant ml-auto bg-accent px-5 py-2 text-sm font-bold text-ink">
+          <a href={channel} className="slant ml-auto bg-button px-5 py-2 text-sm font-bold text-ink">
             Recibí los avisos en Telegram
           </a>
         )}
@@ -47,15 +48,29 @@ function Header({ route, home }: { route: Route; home: Fetched<HomeResponse> }) 
   )
 }
 
+/** Al cambiar de pantalla el foco va al contenido: si no, un lector de pantalla no se entera. */
+function useFocusOnNavigation(pathname: string) {
+  const main = useRef<HTMLElement>(null)
+  const shown = useRef(pathname)
+  useEffect(() => {
+    if (shown.current === pathname) return
+    shown.current = pathname
+    main.current?.focus({ preventScroll: true })
+  }, [pathname])
+  return main
+}
+
 export function App() {
-  const route = matchRoute(usePathname())
+  const pathname = usePathname()
+  const route = matchRoute(pathname)
+  const main = useFocusOnNavigation(pathname)
   // Se pide una sola vez: lo usan el encabezado, el inicio y la lista de carreras.
   const [home, retry] = useJson<HomeResponse>('/api/home')
 
   return (
     <div className="flex min-h-screen flex-col">
       <Header route={route} home={home} />
-      <main className="mx-auto w-full max-w-6xl grow">
+      <main ref={main} tabIndex={-1} className="mx-auto w-full max-w-6xl grow outline-none">
         <Page route={route} home={home} retry={retry} />
       </main>
       <footer className="border-t border-line px-6 py-6 text-center text-xs text-muted">

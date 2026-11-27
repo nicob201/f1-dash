@@ -22,6 +22,13 @@ export function useJson<T>(url: string): [Fetched<T>, () => void] {
   return [done?.key === key ? done.result : { status: 'loading' }, () => setAttempt((n) => n + 1)]
 }
 
+/** El título de la pestaña de cada pantalla. */
+export function useTitle(page?: string): void {
+  useEffect(() => {
+    document.title = page ? `${page} · F1 Dash` : 'F1 Dash'
+  }, [page])
+}
+
 export function Link({ href, onClick, ...props }: ComponentProps<'a'> & { href: string }) {
   return (
     <a
@@ -103,20 +110,23 @@ export const Loading = () => (
 export const LoadError = ({ retry }: { retry: () => void }) => (
   <Message>
     <p role="alert">No pudimos cargar los datos.</p>
-    <button type="button" onClick={retry} className="slant mt-4 cursor-pointer bg-accent px-5 py-2 font-bold text-ink">
+    <button type="button" onClick={retry} className="slant mt-4 cursor-pointer bg-button px-5 py-2 font-bold text-ink">
       Reintentar
     </button>
   </Message>
 )
 
-export const NotFound = ({ text = 'No encontramos esa página.' }: { text?: string }) => (
+export function NotFound({ text = 'No encontramos esa página.' }: { text?: string }) {
+  useTitle('No encontrada')
+  return (
   <Message>
     <p>{text}</p>
     <Link href="/" className="mt-4 inline-block font-bold text-ink underline">
       Volver al inicio
     </Link>
   </Message>
-)
+  )
+}
 
 /** Los tres estados de un pedido; con los datos, `children`. */
 export function Async<T>({ state, retry, missing, children }: {

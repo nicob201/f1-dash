@@ -2,7 +2,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import type { HomeSnapshot } from '../../src/snapshots/types'
 import { countdown, nextRace } from '../lib'
-import { DriverTag, FastestNote, Link, PositionChip, Schedule } from '../ui'
+import { DriverTag, FastestNote, Link, PositionChip, Schedule, useTitle } from '../ui'
 
 /** La hora, actualizada cada 30 segundos: la cuenta regresiva muestra minutos. */
 function useNow(): Date {
@@ -69,7 +69,7 @@ function Last({ season, last }: { season: number; last: NonNullable<HomeSnapshot
       </h2>
       <ol>
         {last.top.map((line) => (
-          <li key={line.code} className="flex items-center gap-2.5 border-t border-line py-2">
+          <li key={line.name} className="flex items-center gap-2.5 border-t border-line py-2">
             <PositionChip finish={line.finish} />
             <span className="w-[4.25rem]">
               <DriverTag color={line.color} label={line.code} title={line.team} />
@@ -87,13 +87,13 @@ function Last({ season, last }: { season: number; last: NonNullable<HomeSnapshot
   )
 }
 
-function Table({ title, rows }: { title: string; rows: { position: number | null; label: string; color: string; points: number; hint?: string }[] }) {
+function Table({ title, rows }: { title: string; rows: { position: number | null; name?: string; label: string; color: string; points: number; hint?: string }[] }) {
   return (
     <>
       <h2 className="mb-1.5 text-[13px] text-muted">{title}</h2>
       <ol className="mb-5 last:mb-0">
         {rows.map((row) => (
-          <li key={row.label} className="flex items-center gap-2.5 border-t border-line py-2">
+          <li key={row.name ?? row.label} className="flex items-center gap-2.5 border-t border-line py-2">
             <PositionChip finish={String(row.position ?? '—')} />
             <DriverTag color={row.color} label={row.label} title={row.hint} />
             <span className="condensed ml-auto text-lg">{row.points}</span>
@@ -105,6 +105,7 @@ function Table({ title, rows }: { title: string; rows: { position: number | null
 }
 
 export function Home({ home }: { home: HomeSnapshot }) {
+  useTitle()
   const hasTables = home.drivers.length > 0 || home.constructors.length > 0
   return (
     <div className="flex flex-col gap-px bg-line pb-px lg:flex-row">
@@ -119,6 +120,9 @@ export function Home({ home }: { home: HomeSnapshot }) {
       {hasTables && (
         <div className="flex min-w-0 flex-col *:grow lg:flex-[0.9]">
           <Column>
+            {home.standingsRound !== null && (
+              <p className="mb-3 text-xs text-muted">Tablas después de la ronda {home.standingsRound}</p>
+            )}
             <Table
               title="Campeonato de pilotos"
               rows={home.drivers.map((d) => ({ ...d, label: d.code, hint: `${d.name}, ${d.team}` }))}

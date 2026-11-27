@@ -10,6 +10,8 @@
   --color-ink: #f3f3f7;
   --color-muted: #9c9cb0;
   --color-accent: #ee2b3b;
+  /* Fondo de botones: con el acento, el texto claro no llega al contraste AA (3,8 contra 4,5). */
+  --color-button: #d81e2e;
   --color-fastest: #b455ff;
   --font-sans: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
 }

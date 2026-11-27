@@ -3,14 +3,13 @@
 //   --enviar   además lo manda a ADMIN_CHAT_ID, solo si es un chat privado (nunca al canal)
 //   --mi-chat  muestra los ids de los chats privados que le escribieron al bot
 import { existsSync } from 'node:fs'
-import { drizzle } from 'drizzle-orm/d1'
-import { getPlatformProxy } from 'wrangler'
 import { loadSeason } from '../src/db/queries'
 import { commandReply } from '../src/notices/commands'
 import type { SeasonData } from '../src/notices/data'
 import type { NoticeType } from '../src/notices/decide'
 import * as messages from '../src/notices/messages'
 import { isPrivateChat, sendMessage } from '../src/telegram'
+import { openDb } from './db'
 
 const SEASON = 2026
 const LINKS = { channel: null, webUrl: null }
@@ -77,9 +76,9 @@ if (!isCommand && !(Object.hasOwn(NOTICES, what) && Number(roundArg) > 0)) {
   process.exit(1)
 }
 
-const platform = await getPlatformProxy<{ DB: D1Database }>({ configPath: 'wrangler.jsonc', remoteBindings: false })
+const { db, dispose } = await openDb(false)
 try {
-  const data = await loadSeason(drizzle(platform.env.DB), SEASON)
+  const data = await loadSeason(db, SEASON)
   if (data.races.length === 0) throw new Error('La base local está vacía: correr las migraciones y npm run seed')
   const text = isCommand ? commandReply(what, data, new Date(), LINKS) : NOTICES[what as NoticeType](data, Number(roundArg))
   console.log(text)
@@ -92,5 +91,5 @@ try {
     }
   }
 } finally {
-  await platform.dispose()
+  await dispose()
 }

@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { arDate } from '../../src/format/es'
 import type { DriverRef, RaceSnapshot, ResultLine } from '../../src/snapshots/types'
 import { resultPending } from '../lib'
-import { Async, DriverTag, FastestNote, Link, PositionChip, Schedule, useJson } from '../ui'
+import { Async, DriverTag, FastestNote, Link, PositionChip, Schedule, useJson, useTitle } from '../ui'
 
 export function Race({ season, round }: { season: number; round: number }) {
   const [state, retry] = useJson<RaceSnapshot>(`/api/races/${season}/${round}`)
@@ -128,8 +128,10 @@ function Gained({ value }: { value: number | null }) {
 }
 
 function Detail({ race }: { race: RaceSnapshot }) {
+  useTitle(`${race.gp} ${race.season}`)
   const start = race.sessions.find((s) => s.kind === 'race')
-  const byDriver = (r: DriverRef) => r.code
+  // El código de respaldo puede repetirse; el nombre no.
+  const byDriver = (r: DriverRef) => r.name
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-6">
@@ -196,7 +198,7 @@ function Detail({ race }: { race: RaceSnapshot }) {
       <Section
         title="Paradas en boxes"
         rows={race.pits}
-        rowKey={(r) => `${r.code} ${r.stop}`}
+        rowKey={(r) => `${r.name} ${r.stop}`}
         columns={[
           driver(),
           { head: 'Parada', cell: (r) => r.stop, className: RIGHT },
