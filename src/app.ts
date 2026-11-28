@@ -89,6 +89,8 @@ export function createApp(fetcher: typeof fetch = fetch) {
   app.get('/api/races/:season{[0-9]+}/:round{[0-9]+}', (c) =>
     snapshot(c, `race:${c.req.param('season')}:${c.req.param('round')}`),
   )
+  app.get('/api/championship', (c) => snapshot(c, 'championship'))
+  app.get('/api/stats', (c) => snapshot(c, 'stats'))
   app.all('/api/*', (c) => c.json({ error: 'not_found' }, 404))
 
   return app

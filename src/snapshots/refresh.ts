@@ -5,6 +5,8 @@ import { saveSnapshots, type Db } from '../db/save'
 import { circuits, kv, pitStops, races, results } from '../db/schema'
 import type { SeasonData } from '../notices/data'
 import { homeSnapshot, raceSnapshot } from './build'
+import { championshipSnapshot } from './championship'
+import { statsSnapshot } from './stats'
 
 /** La de la última carrera corrida; sin ninguna, la del calendario más nuevo. */
 async function shownSeason(db: Db): Promise<number | null> {
@@ -38,6 +40,10 @@ export async function buildSnapshots(db: Db): Promise<number> {
   const shown = await loadSeason(db, season)
   const upcoming = await loadSeason(db, season + 1)
   const rows = [{ key: 'home', value: JSON.stringify(homeSnapshot(shown, upcoming)) }, ...(await racePages(db, shown))]
+  // Sin tablas no se arman, y queda el último guardado: dice de qué temporada es.
+  for (const [key, value] of [['championship', championshipSnapshot(shown)], ['stats', statsSnapshot(shown)]] as const) {
+    if (value) rows.push({ key, value: JSON.stringify(value) })
+  }
   const rebuilt = [season]
   for (const other of new Set(await savedSeasons(db))) {
     if (other === season) continue

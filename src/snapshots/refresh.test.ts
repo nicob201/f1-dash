@@ -4,6 +4,8 @@ import { loadSeason } from '../db/queries'
 import { saveCalendar, saveCircuits, savePitStops, saveResults, saveStandings } from '../db/save'
 import { season2026 } from '../notices/__fixtures__/season'
 import { homeSnapshot, raceSnapshot } from './build'
+import { championshipSnapshot } from './championship'
+import { statsSnapshot } from './stats'
 import { buildSnapshots } from './refresh'
 import type { HomeSnapshot, RaceSnapshot } from './types'
 
@@ -38,20 +40,22 @@ it('cada carrera trae su circuito de la base', async () => {
 it('guarda el inicio y una fila por carrera', async () => {
   await save2026()
   await savePitStops(db, [{ season: 2026, round: 21, driverId: 'max_verstappen', stop: 1, lap: 20, duration: '2.4' }])
-  expect(await buildSnapshots(db)).toBe(24)
-  expect(await count()).toBe(24)
+  expect(await buildSnapshots(db)).toBe(26)
+  expect(await count()).toBe(26)
   const season = await loadSeason(db, 2026)
   expect(await read('home')).toEqual(homeSnapshot(season, { season: 2027, races: [], sessions: [] }))
   expect((await read<RaceSnapshot>('race:2026:21')).pits).toMatchObject([{ code: 'VER', lap: 20 }])
   expect(await read('race:2026:1')).toEqual(raceSnapshot(season, [], 1))
   expect((await read<RaceSnapshot>('race:2026:23')).round).toBe(23)
+  expect(await read('championship')).toEqual(championshipSnapshot(season))
+  expect(await read('stats')).toEqual(statsSnapshot(season))
 })
 it('se puede volver a correr y actualiza lo que cambió', async () => {
   await save2026()
   await buildSnapshots(db)
   await env.DB.prepare("update results set time = '1:00:00.000' where kind = 'race' and position = 1").run()
   await buildSnapshots(db)
-  expect(await count()).toBe(24)
+  expect(await count()).toBe(26)
   expect((await read<RaceSnapshot>('race:2026:21')).race[0]!.time).toBe('1:00:00.000')
 })
 it('con el calendario siguiente sin resultados, muestra la temporada corrida', async () => {
@@ -69,6 +73,12 @@ it('pasa a la temporada siguiente con su primera carrera corrida', async () => {
   await saveResults(db, { drivers: [], constructors: [], results })
   await buildSnapshots(db)
   expect((await read<HomeSnapshot>('home')).season).toBe(2027)
+})
+it('sin tablas no hay campeonato ni stats', async () => {
+  await saveCalendar2027()
+  expect(await buildSnapshots(db)).toBe(24)
+  const keys = await env.DB.prepare("select count(*) n from kv where key in ('championship', 'stats')").first<number>('n')
+  expect(keys).toBe(0)
 })
 it('sin carreras corridas usa el calendario más nuevo', async () => {
   await saveCalendar2027()
@@ -91,8 +101,8 @@ it('borra la página de una carrera que salió del calendario', async () => {
   await buildSnapshots(db)
   const d = season2026()
   await saveCalendar(db, d.races.filter((r) => r.round !== 23), d.sessions.filter((s) => s.round !== 23))
-  expect(await buildSnapshots(db)).toBe(23)
-  expect([await count(), await env.DB.prepare("select count(*) n from kv where key = 'race:2026:23'").first('n')]).toEqual([23, 0])
+  expect(await buildSnapshots(db)).toBe(25)
+  expect([await count(), await env.DB.prepare("select count(*) n from kv where key = 'race:2026:23'").first('n')]).toEqual([25, 0])
 })
 it('con la base vacía no escribe ni borra nada', async () => {
   await env.DB.prepare("insert into kv (key, value) values ('home', '{}')").run()

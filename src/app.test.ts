@@ -142,9 +142,13 @@ describe('fallas', () => {
 describe('api de la web', () => {
   const HOME = '{"season":2026,"races":[]}'
   const RACE = '{"season":2026,"round":21}'
+  const CHAMPIONSHIP = '{"season":2026,"round":21,"drivers":[]}'
+  const STATS = '{"season":2026,"round":21,"duels":[]}'
   beforeAll(async () => {
     const put = env.DB.prepare('insert or replace into kv (key, value) values (?, ?)')
-    await env.DB.batch([put.bind('home', HOME), put.bind('race:2026:21', RACE)])
+    await env.DB.batch([
+      put.bind('home', HOME), put.bind('race:2026:21', RACE), put.bind('championship', CHAMPIONSHIP), put.bind('stats', STATS),
+    ])
   })
   const get = (path: string, e = bindings()) => app.request(path, {}, e)
   const headers = (res: Response) => [res.headers.get('content-type'), res.headers.get('cache-control')]
@@ -158,6 +162,12 @@ describe('api de la web', () => {
     expect([race.status, await race.text()]).toEqual([200, RACE])
     expect(headers(race)).toEqual(['application/json', 'public, max-age=60'])
   })
+  it('devuelve el campeonato y las stats guardados', async () => {
+    for (const [path, body] of [['/api/championship', CHAMPIONSHIP], ['/api/stats', STATS]] as const) {
+      const res = await get(path)
+      expect([res.status, await res.text(), ...headers(res)]).toEqual([200, body, 'application/json', 'public, max-age=60'])
+    }
+  })
   it.each([
     [undefined, null], ['', null], ['@canal', '@canal'], ['a"b\\c', 'a"b\\c'],
   ])('con CHANNEL_LINK %j el canal es %j', async (value, channel) => {
@@ -165,7 +175,7 @@ describe('api de la web', () => {
     expect(await res.json()).toEqual({ channel, snapshot: JSON.parse(HOME) })
   })
   it.each([
-    '/api/races/2026/22', '/api/races/2026/0', '/api/races/2026/999', '/api/races/abc/1', '/api/races/2026', '/api/nada', '/api',
+    '/api/races/2026/22', '/api/races/2026/0', '/api/races/2026/999', '/api/races/abc/1', '/api/races/2026', '/api/nada', '/api', '/api/stats/x', '/api/championship/2026',
   ])('%s → 404 en JSON, sin caché', async (path) => {
     const res = await get(path)
     expect([res.status, await res.json(), res.headers.get('cache-control')]).toEqual([404, { error: 'not_found' }, null])
