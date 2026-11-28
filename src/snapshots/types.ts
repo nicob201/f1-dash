@@ -59,3 +59,17 @@ export type ChampionshipSnapshot = {
   /** points[i] es el total tras rounds[i]; null si ese piloto no figuraba en esa tabla. */
   chart: { rounds: number[]; lines: ChartLine[] }
 }
+
+export type Kpis = { wins: number; podiums: number; poles: number; dnfs: number; gained: number; average: number | null }
+/** Con un solo candidato, ese es el campeón. */
+export type TitleRace<T> = { contenders: T[]; pointsLeft: number }
+/** `a` es el mejor ubicado de los dos en el campeonato. Marcadores como [a, b]. */
+export type Duel = { team: string; color: string; a: DriverRef; b: DriverRef; quali: [number, number]; race: [number, number] }
+export type StatsSnapshot = {
+  season: number
+  round: number
+  titles: { drivers: TitleRace<DriverStanding>; constructors: TitleRace<TeamStanding> }
+  drivers: (DriverRef & Kpis)[]
+  teams: ({ team: string; color: string } & Kpis)[]
+  duels: Duel[]
+}
