@@ -1,6 +1,6 @@
 import { season2026 } from '../src/notices/__fixtures__/season'
 import { homeSnapshot, raceSnapshot } from '../src/snapshots/build'
-import { channelUrl, countdown, loadJson, matchRoute, nextRace, resultPending, spreadLabels, trackFacts } from './lib'
+import { channelUrl, countdown, formatAverage, formatGained, loadJson, matchRoute, nextRace, resultPending, spreadLabels, trackFacts } from './lib'
 
 const d = season2026()
 const NONE = { season: 2027, races: [], sessions: [] }
@@ -98,4 +98,11 @@ describe('spreadLabels', () => {
   it('si la última se pasa del borde, sube a las de arriba', () => {
     expect(spreadLabels([97, 99], 5, 100)).toEqual([95, 100])
   })
+})
+
+it('el promedio va con coma y un decimal, y sin llegadas es una raya', () => {
+  expect([formatAverage(4.25), formatAverage(8), formatAverage(null)]).toEqual(['4,3', '8,0', '—'])
+})
+it('las posiciones ganadas llevan signo', () => {
+  expect([formatGained(14), formatGained(0), formatGained(-3)]).toEqual(['+14', '0', '-3'])
 })

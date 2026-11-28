@@ -81,3 +81,6 @@ export function spreadLabels(ys: number[], gap: number, max: number): number[] {
   }
   return out
 }
+
+export const formatAverage = (v: number | null): string => (v === null ? '—' : v.toFixed(1).replace('.', ','))
+export const formatGained = (v: number): string => (v > 0 ? `+${v}` : String(v))

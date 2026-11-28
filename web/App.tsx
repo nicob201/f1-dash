@@ -6,6 +6,7 @@ import { Championship } from './pages/Championship'
 import { Home } from './pages/Home'
 import { Race } from './pages/Race'
 import { Races } from './pages/Races'
+import { Stats } from './pages/Stats'
 import { usePathname } from './router'
 import { Async, Link, NotFound, useJson, type Fetched } from './ui'
 
@@ -94,7 +95,7 @@ function Page({ route, home, retry }: { route: Route; home: Fetched<HomeResponse
   if (route.page === 'notFound') return <NotFound />
   if (route.page === 'race') return <Race season={route.season} round={route.round} />
   if (route.page === 'championship') return <Championship />
-  if (route.page === 'stats') return <NotFound />
+  if (route.page === 'stats') return <Stats />
   const Screen = route.page === 'home' ? Home : Races
   return (
     <Async state={home} retry={retry} missing={<NotFound text="Todavía no hay datos cargados." />}>
