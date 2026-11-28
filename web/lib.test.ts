@@ -1,6 +1,6 @@
 import { season2026 } from '../src/notices/__fixtures__/season'
 import { homeSnapshot, raceSnapshot } from '../src/snapshots/build'
-import { channelUrl, countdown, loadJson, matchRoute, nextRace, resultPending, trackFacts } from './lib'
+import { channelUrl, countdown, loadJson, matchRoute, nextRace, resultPending, spreadLabels, trackFacts } from './lib'
 
 const d = season2026()
 const NONE = { season: 2027, races: [], sessions: [] }
@@ -17,7 +17,11 @@ describe('matchRoute', () => {
     ['/carreras/abc/1', { page: 'notFound' }],
     ['/carreras/2026', { page: 'notFound' }],
     ['/carreras/2026/22/x', { page: 'notFound' }],
-    ['/campeonato', { page: 'notFound' }],
+    ['/campeonato', { page: 'championship' }],
+    ['/campeonato/', { page: 'championship' }],
+    ['/stats', { page: 'stats' }],
+    ['/stats/', { page: 'stats' }],
+    ['/campeonato/x', { page: 'notFound' }],
   ])('%s', (path, route) => expect(matchRoute(path)).toEqual(route))
 })
 
@@ -82,4 +86,16 @@ it('los datos del circuito van en castellano: coma decimal y sin punto en los nÃ
     ['Inaugurado en', '1962'],
     ['Primer GP', '1963'],
   ])
+})
+
+describe('spreadLabels', () => {
+  it('separa hacia abajo las que quedan muy cerca', () => {
+    expect(spreadLabels([10, 11, 50], 5, 100)).toEqual([10, 15, 50])
+  })
+  it('devuelve en el orden de entrada', () => {
+    expect(spreadLabels([50, 11, 10], 5, 100)).toEqual([50, 15, 10])
+  })
+  it('si la Ãºltima se pasa del borde, sube a las de arriba', () => {
+    expect(spreadLabels([97, 99], 5, 100)).toEqual([95, 100])
+  })
 })

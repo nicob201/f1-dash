@@ -1,9 +1,8 @@
 // El detalle de una carrera. Una sección sin datos no se muestra.
-import type { ReactNode } from 'react'
 import { arDate } from '../../src/format/es'
 import type { DriverRef, RaceSnapshot, ResultLine, Track } from '../../src/snapshots/types'
 import { resultPending, trackFacts } from '../lib'
-import { Async, DriverTag, FastestNote, Link, PositionChip, Schedule, useJson, useTitle } from '../ui'
+import { Async, DriverTag, FastestNote, Link, PositionChip, RIGHT, Schedule, Section, useJson, useTitle, WIDE, type Column } from '../ui'
 
 export function Race({ season, round }: { season: number; round: number }) {
   const [state, retry] = useJson<RaceSnapshot>(`/api/races/${season}/${round}`)
@@ -26,53 +25,6 @@ function Arrow({ season, round, label, symbol }: { season: number; round: number
     </Link>
   )
 }
-
-type Column<T> = { head: string; cell: (row: T) => ReactNode; className?: string }
-
-/** Una sección con su tabla. Si no entra, el scroll es de la tabla y no de la página. */
-function Section<T>({ title, rows, columns, rowKey, children }: {
-  title: string
-  rows: T[]
-  columns: Column<T>[]
-  rowKey: (row: T) => string
-  children?: ReactNode
-}) {
-  if (rows.length === 0) return null
-  return (
-    <section className="mt-9">
-      <h2 className="title-gp mb-2 text-3xl">{title}</h2>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-xs text-muted">
-              {columns.map((c) => (
-                <th key={c.head} scope="col" className={`pr-2 pb-2 font-normal last:pr-0 ${c.className ?? ''}`}>
-                  {c.head}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={rowKey(row)} className="border-t border-line">
-                {columns.map((c) => (
-                  <td key={c.head} className={`py-2 pr-2 last:pr-0 ${c.className ?? ''}`}>
-                    {c.cell(row)}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {children}
-    </section>
-  )
-}
-
-const RIGHT = 'text-right whitespace-nowrap'
-/** En mobile alcanza con el código. */
-const WIDE = 'hidden sm:table-cell text-[13px] text-muted'
 
 const driver = <T extends DriverRef>(): Column<T> => ({
   head: 'Piloto',

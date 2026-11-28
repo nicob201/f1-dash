@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react'
 import type { HomeResponse } from '../src/snapshots/types'
 import { channelUrl, matchRoute, type Route } from './lib'
+import { Championship } from './pages/Championship'
 import { Home } from './pages/Home'
 import { Race } from './pages/Race'
 import { Races } from './pages/Races'
@@ -12,6 +13,8 @@ function Nav({ route }: { route: Route }) {
   const items = [
     { href: '/', label: 'Inicio', active: route.page === 'home' },
     { href: '/carreras', label: 'Carreras', active: route.page === 'races' || route.page === 'race' },
+    { href: '/campeonato', label: 'Campeonato', active: route.page === 'championship' },
+    { href: '/stats', label: 'Stats', active: route.page === 'stats' },
   ]
   return (
     <nav aria-label="Principal" className="flex gap-5 text-sm">
@@ -90,6 +93,8 @@ export function App() {
 function Page({ route, home, retry }: { route: Route; home: Fetched<HomeResponse>; retry: () => void }) {
   if (route.page === 'notFound') return <NotFound />
   if (route.page === 'race') return <Race season={route.season} round={route.round} />
+  if (route.page === 'championship') return <Championship />
+  if (route.page === 'stats') return <NotFound />
   const Screen = route.page === 'home' ? Home : Races
   return (
     <Async state={home} retry={retry} missing={<NotFound text="Todavía no hay datos cargados." />}>

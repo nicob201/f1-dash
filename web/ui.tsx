@@ -140,3 +140,50 @@ export function Async<T>({ state, retry, missing, children }: {
   if (state.status === 'notFound') return missing ?? <NotFound />
   return children(state.data)
 }
+
+export type Column<T> = { head: string; cell: (row: T) => ReactNode; className?: string }
+
+/** Una sección con su tabla. Si no entra, el scroll es de la tabla y no de la página. */
+export function Section<T>({ title, rows, columns, rowKey, children }: {
+  title: string
+  rows: T[]
+  columns: Column<T>[]
+  rowKey: (row: T) => string
+  children?: ReactNode
+}) {
+  if (rows.length === 0) return null
+  return (
+    <section className="mt-9">
+      <h2 className="title-gp mb-2 text-3xl">{title}</h2>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-left text-xs text-muted">
+              {columns.map((c) => (
+                <th key={c.head} scope="col" className={`pr-2 pb-2 font-normal last:pr-0 ${c.className ?? ''}`}>
+                  {c.head}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={rowKey(row)} className="border-t border-line">
+                {columns.map((c) => (
+                  <td key={c.head} className={`py-2 pr-2 last:pr-0 ${c.className ?? ''}`}>
+                    {c.cell(row)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {children}
+    </section>
+  )
+}
+
+export const RIGHT = 'text-right whitespace-nowrap'
+/** En mobile alcanza con el código. */
+export const WIDE = 'hidden sm:table-cell text-[13px] text-muted'

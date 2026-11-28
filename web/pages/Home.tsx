@@ -128,6 +128,9 @@ export function Home({ home }: { home: HomeSnapshot }) {
               rows={home.drivers.map((d) => ({ ...d, label: d.code, hint: `${d.name}, ${d.team}` }))}
             />
             <Table title="Constructores" rows={home.constructors.map((c) => ({ ...c, label: c.team }))} />
+            <Link href="/campeonato" className="mt-4 inline-block text-sm font-bold underline">
+              Ver las tablas completas
+            </Link>
           </Column>
         </div>
       )}

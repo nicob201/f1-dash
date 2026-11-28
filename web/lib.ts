@@ -5,12 +5,16 @@ export type Route =
   | { page: 'home' }
   | { page: 'races' }
   | { page: 'race'; season: number; round: number }
+  | { page: 'championship' }
+  | { page: 'stats' }
   | { page: 'notFound' }
 
 export function matchRoute(pathname: string): Route {
   const path = pathname.replace(/(.)\/$/, '$1')
   if (path === '/') return { page: 'home' }
   if (path === '/carreras') return { page: 'races' }
+  if (path === '/campeonato') return { page: 'championship' }
+  if (path === '/stats') return { page: 'stats' }
   // La misma dirección que arma el mensaje de la carrera.
   const race = /^\/carreras\/(\d+)\/(\d+)$/.exec(path)
   return race ? { page: 'race', season: Number(race[1]), round: Number(race[2]) } : { page: 'notFound' }
@@ -61,3 +65,19 @@ export const trackFacts = (t: Track): [string, string][] => [
   ['Inaugurado en', String(t.opened)],
   ['Primer GP', String(t.firstGp)],
 ]
+
+/**
+ * Separa posiciones verticales (en % desde arriba) para que ninguna quede a menos de `gap` de otra,
+ * sin pasar de `max`. Devuelve en el orden de entrada.
+ */
+export function spreadLabels(ys: number[], gap: number, max: number): number[] {
+  const order = ys.map((_, i) => i).sort((a, b) => ys[a]! - ys[b]!)
+  const out = [...ys]
+  for (let k = 1; k < order.length; k++) out[order[k]!] = Math.max(out[order[k]!]!, out[order[k - 1]!]! + gap)
+  const last = order.at(-1)
+  if (last !== undefined && out[last]! > max) {
+    out[last] = max
+    for (let k = order.length - 2; k >= 0; k--) out[order[k]!] = Math.min(out[order[k]!]!, out[order[k + 1]!]! - gap)
+  }
+  return out
+}
