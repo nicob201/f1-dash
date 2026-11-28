@@ -1,7 +1,7 @@
 # Web, entrega 2: Campeonato y Stats
 
 - **Fecha:** 2026-11-28
-- **Estado:** borrador para el autor
+- **Estado:** aprobado por el autor el 2026-11-28
 - **Base:** `docs/2026-11-25-f1-dash-design.md` (en adelante, "el spec") y `docs/superpowers/specs/2026-11-27-web-entrega-1-design.md` ("la entrega 1"). Lo que este documento no cambia vale como está ahí. Lo marcado **(Claude)** es una decisión propia para que el autor la revise.
 
 ## 1. Qué es y para qué
