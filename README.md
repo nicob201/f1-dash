@@ -39,7 +39,7 @@ npm run deploy                                      # compila y despliega
 
 Desplegar siempre con `npm run deploy`: `wrangler deploy` a secas publica el último build. `dist/` tiene una copia de `.dev.vars` y está ignorado por git.
 
-Los secretos del Worker (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`) se cargan con `npx wrangler secret put`. Para que `/start` muestre el canal o la web: `CHANNEL_LINK` y `WEB_URL` en `vars` de `wrangler.jsonc` (lo cargado solo en el panel de Cloudflare lo borra el próximo deploy). `CHANNEL_LINK` también muestra el botón de Telegram en la web: `@canal` o un enlace `https://t.me/…`.
+Los secretos del Worker (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`) se cargan con `npx wrangler secret put`. Para que `/start` muestre la web, `WEB_URL` va como secreto (`npx wrangler secret put WEB_URL`), así la dirección no queda en el repo. Para el canal, `CHANNEL_LINK` en `vars` de `wrangler.jsonc` (lo cargado solo en el panel de Cloudflare lo borra el próximo deploy). `CHANNEL_LINK` también muestra el botón de Telegram en la web: `@canal` o un enlace `https://t.me/…`.
 
 Para enviar, `.dev.vars` (ignorado por git) necesita `TELEGRAM_BOT_TOKEN` y `ADMIN_CHAT_ID`. `--enviar` se niega a mandar a un canal o grupo.
 
