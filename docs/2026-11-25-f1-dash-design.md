@@ -253,6 +253,8 @@ La de la última carrera terminada. Entre diciembre y marzo se ve la temporada a
   - **Duelos de compañeros:** quién terminó adelante, en clasificación y en carrera.
   - **"¿Quién puede ser campeón?"**, mientras haya más de un candidato.
 
+  *(2026-11-28: con un solo candidato, el bloque muestra al campeón en vez de desaparecer. Ver `docs/superpowers/specs/2026-11-28-web-entrega-2-design.md`, §5.3.)*
+
 **Definiciones** (el builder las verifica contra los fixtures reales):
 
 - Victorias y podios son solo de la carrera del domingo. La sprint no cuenta.
@@ -274,6 +276,8 @@ Un Worker con Hono. Las respuestas son `GET` públicos y nunca consultan las fue
 - `GET /api/races/:season/:round`: el detalle de una carrera.
 
 *(2026-11-27: mientras no exista el reloj, los snapshots los arma la carga de datos. Se arman con funciones de TypeScript, no con SQL. Ver `docs/superpowers/specs/2026-11-27-web-entrega-1-design.md`, §5.1.)*
+
+*(2026-11-28: el campeonato y las stats no van en `/api/home`: tienen sus rutas, `GET /api/championship` y `GET /api/stats`. Ver `docs/superpowers/specs/2026-11-28-web-entrega-2-design.md`, §7.)*
 
 **Decisión de Claude: snapshots precalculados.** Cuando el reloj guarda datos nuevos, arma el JSON de cada endpoint con SQL (KPIs, duelos, puntos acumulados) y lo guarda en `kv`. La API lee una sola fila. Las razones:
 

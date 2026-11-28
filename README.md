@@ -7,7 +7,7 @@ Proyecto de un fan. No es un sitio oficial de la Fórmula 1. Datos: Jolpica y Op
 - Diseño: `docs/2026-11-25-f1-dash-design.md`
 - Planes: `docs/superpowers/plans/`
 
-**Estado:** el bot contesta `/proxima`, `/ultima` y `/campeonato` por privado. La web tiene el inicio y las carreras, con el trazado de cada circuito; faltan el campeonato, las stats y el reloj (descarga de datos y publicación en el canal). Mientras no esté el reloj, los datos se actualizan a mano con `npm run seed -- --remote`.
+**Estado:** el bot contesta `/proxima`, `/ultima` y `/campeonato` por privado. La web está completa: inicio, carreras con el trazado de cada circuito, campeonato con el gráfico de puntos y stats. Falta el reloj (descarga de datos y publicación en el canal). Mientras no esté el reloj, los datos se actualizan a mano con `npm run seed -- --remote`.
 
 ## Comandos
 
