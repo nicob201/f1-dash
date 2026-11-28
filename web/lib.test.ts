@@ -1,6 +1,6 @@
 import { season2026 } from '../src/notices/__fixtures__/season'
 import { homeSnapshot, raceSnapshot } from '../src/snapshots/build'
-import { channelUrl, countdown, loadJson, matchRoute, nextRace, resultPending } from './lib'
+import { channelUrl, countdown, loadJson, matchRoute, nextRace, resultPending, trackFacts } from './lib'
 
 const d = season2026()
 const NONE = { season: 2027, races: [], sessions: [] }
@@ -73,4 +73,13 @@ it('resultPending: solo desde la largada y sin resultado', () => {
   expect(resultPending(qatar, at('2026-11-29T15:59:00Z'))).toBe(false)
   expect(resultPending(qatar, at('2026-11-29T16:00:00Z'))).toBe(true)
   expect(resultPending(raceSnapshot(d, [], 21), at('2026-12-01T00:00:00Z'))).toBe(false)
+})
+
+it('los datos del circuito van en castellano: coma decimal y sin punto en los números de cuatro cifras', () => {
+  expect(trackFacts({ length: 5380, altitude: 2232, opened: 1962, firstGp: 1963, path: '' })).toEqual([
+    ['Longitud', '5,380 km'],
+    ['Altitud', '2232 m'],
+    ['Inaugurado en', '1962'],
+    ['Primer GP', '1963'],
+  ])
 })

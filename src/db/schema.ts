@@ -7,6 +7,8 @@ export const races = sqliteTable('races', {
   round: integer().notNull(),
   name: text().notNull(),
   circuit: text().notNull(),
+  // La clave de Jolpica (`losail`). Las filas guardadas antes de tenerla quedan en '' hasta la próxima carga.
+  circuitId: text('circuit_id').notNull().default(''),
   locality: text().notNull(),
   country: text().notNull(),
 }, (t) => [primaryKey({ columns: [t.season, t.round] })])
@@ -89,4 +91,14 @@ export const grids = sqliteTable('grids', {
 export const kv = sqliteTable('kv', {
   key: text().primaryKey(),
   value: text().notNull(),
+})
+
+// Uno por circuito, con la clave de Jolpica. No lleva temporada: se carga una vez (ver src/sources/circuits.ts).
+export const circuits = sqliteTable('circuits', {
+  id: text().primaryKey(),
+  length: integer().notNull(),
+  altitude: integer().notNull(),
+  opened: integer().notNull(),
+  firstGp: integer('first_gp').notNull(),
+  path: text().notNull(),
 })

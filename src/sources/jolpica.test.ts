@@ -19,7 +19,7 @@ describe('parseCalendar', () => {
     expect(sessions.filter((s) => s.kind === 'sprint_quali')).toHaveLength(6)
   })
   it('Qatar, en UTC', () => {
-    expect(races[21]).toMatchObject({ season: 2026, round: 22, name: 'Qatar Grand Prix', circuit: 'Lusail International Circuit' })
+    expect(races[21]).toMatchObject({ season: 2026, round: 22, name: 'Qatar Grand Prix', circuit: 'Lusail International Circuit', circuitId: 'losail' })
     expect(of(22).map((s) => s.kind).sort()).toEqual(['fp1', 'fp2', 'fp3', 'quali', 'race'])
     expect(of(22).find((s) => s.kind === 'quali')!.startsAt.toISOString()).toBe('2026-11-28T18:00:00.000Z')
     expect(of(22).find((s) => s.kind === 'race')!.startsAt.toISOString()).toBe('2026-11-29T16:00:00.000Z')

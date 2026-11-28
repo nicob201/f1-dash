@@ -1,5 +1,5 @@
 // La lógica del front, sin React: se prueba sola.
-import type { HomeSnapshot, RaceInfo, RaceSnapshot } from '../src/snapshots/types'
+import type { HomeSnapshot, RaceInfo, RaceSnapshot, Track } from '../src/snapshots/types'
 
 export type Route =
   | { page: 'home' }
@@ -53,3 +53,11 @@ export function countdown(target: Date, now: Date) {
 
 /** Ya pasó la hora de largada y no hay resultado. No afirma que se haya corrido. */
 export const resultPending = (race: RaceSnapshot, now: Date): boolean => race.race.length === 0 && startOf(race) <= now.getTime()
+
+/** Las cuatro cifras de la altitud van sin punto, como pide la RAE. */
+export const trackFacts = (t: Track): [string, string][] => [
+  ['Longitud', `${(t.length / 1000).toFixed(3).replace('.', ',')} km`],
+  ['Altitud', `${t.altitude} m`],
+  ['Inaugurado en', String(t.opened)],
+  ['Primer GP', String(t.firstGp)],
+]

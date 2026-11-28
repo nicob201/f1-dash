@@ -1,7 +1,7 @@
 import { env } from 'cloudflare:workers'
 import { drizzle } from 'drizzle-orm/d1'
 import { loadSeason } from '../db/queries'
-import { saveCalendar, savePitStops, saveResults, saveStandings } from '../db/save'
+import { saveCalendar, saveCircuits, savePitStops, saveResults, saveStandings } from '../db/save'
 import { season2026 } from '../notices/__fixtures__/season'
 import { homeSnapshot, raceSnapshot } from './build'
 import { buildSnapshots } from './refresh'
@@ -9,7 +9,7 @@ import type { HomeSnapshot, RaceSnapshot } from './types'
 
 const db = drizzle(env.DB)
 beforeEach(async () => {
-  const tables = ['races', 'sessions', 'drivers', 'constructors', 'results', 'standings', 'pit_stops', 'grids', 'kv']
+  const tables = ['races', 'sessions', 'drivers', 'constructors', 'results', 'standings', 'pit_stops', 'grids', 'kv', 'circuits']
   await env.DB.batch(tables.map((t) => env.DB.prepare(`delete from ${t}`)))
 })
 
@@ -28,6 +28,13 @@ const read = async <T>(key: string) =>
   JSON.parse((await env.DB.prepare('select value from kv where key = ?').bind(key).first<string>('value'))!) as T
 const count = async () => env.DB.prepare('select count(*) n from kv').first<number>('n')
 
+it('cada carrera trae su circuito de la base', async () => {
+  await save2026()
+  await saveCircuits(db, [{ id: 'losail', length: 5380, altitude: 5, opened: 2004, firstGp: 2021, path: 'M2,98L98,98Z' }])
+  await buildSnapshots(db)
+  expect((await read<RaceSnapshot>('race:2026:22')).track).toMatchObject({ length: 5380, firstGp: 2021 })
+  expect((await read<RaceSnapshot>('race:2026:21')).track).toBeNull()
+})
 it('guarda el inicio y una fila por carrera', async () => {
   await save2026()
   await savePitStops(db, [{ season: 2026, round: 21, driverId: 'max_verstappen', stop: 1, lap: 20, duration: '2.4' }])

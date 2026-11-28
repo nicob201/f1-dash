@@ -3,8 +3,8 @@ import { and, eq, getTableColumns, like, sql, type SQL } from 'drizzle-orm'
 import type { BatchItem } from 'drizzle-orm/batch'
 import type { DrizzleD1Database } from 'drizzle-orm/d1'
 import type { SQLiteColumn, SQLiteTable } from 'drizzle-orm/sqlite-core'
-import type { GridRow, ParsedResults, PitStopRow, RaceRow, SessionRow, StandingRow } from '../types'
-import { constructors, drivers, grids, kv, pitStops, races, results, sessions, standings } from './schema'
+import type { CircuitRow, GridRow, ParsedResults, PitStopRow, RaceRow, SessionRow, StandingRow } from '../types'
+import { circuits, constructors, drivers, grids, kv, pitStops, races, results, sessions, standings } from './schema'
 
 export type Db = DrizzleD1Database
 
@@ -90,6 +90,10 @@ export async function savePitStops(db: Db, rows: PitStopRow[]): Promise<void> {
 
 export async function saveGrid(db: Db, rows: GridRow[]): Promise<void> {
   await run(db, replace(db, grids, rows, (r) => [[grids.season, r.season], [grids.round, r.round], [grids.kind, r.kind]]))
+}
+
+export async function saveCircuits(db: Db, rows: CircuitRow[]): Promise<void> {
+  await run(db, upsert(db, circuits, [circuits.id], rows))
 }
 
 /** Guarda los snapshots y borra las páginas de carrera de `seasons` que no vinieron, todo junto. */

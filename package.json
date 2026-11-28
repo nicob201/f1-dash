@@ -10,6 +10,7 @@
     "typecheck": "wrangler types --include-runtime=true && tsc --noEmit && tsc --noEmit -p web",
     "seed": "tsx scripts/seed.ts",
     "snapshots": "tsx scripts/snapshots.ts",
+    "circuits": "tsx scripts/circuits.ts",
     "avisos": "tsx scripts/preview.ts",
     "webhook": "tsx scripts/set-webhook.ts"
   },

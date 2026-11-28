@@ -75,7 +75,13 @@ export function App() {
       </main>
       <footer className="border-t border-line px-6 py-6 text-center text-xs text-muted">
         <p>Proyecto de un fan. No es un sitio oficial de la Fórmula 1.</p>
-        <p className="mt-1">Datos: Jolpica y OpenF1</p>
+        <p className="mt-1">
+          Datos: Jolpica y OpenF1. Trazados:{' '}
+          <a href="https://github.com/bacinger/f1-circuits" className="underline hover:text-ink">
+            f1-circuits
+          </a>
+          , © Tomislav Bacinger, licencia MIT.
+        </p>
       </footer>
     </div>
   )

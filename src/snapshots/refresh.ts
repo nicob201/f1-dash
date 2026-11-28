@@ -2,7 +2,7 @@
 import { eq, like, max } from 'drizzle-orm'
 import { loadSeason } from '../db/queries'
 import { saveSnapshots, type Db } from '../db/save'
-import { kv, pitStops, races, results } from '../db/schema'
+import { circuits, kv, pitStops, races, results } from '../db/schema'
 import type { SeasonData } from '../notices/data'
 import { homeSnapshot, raceSnapshot } from './build'
 
@@ -22,9 +22,10 @@ async function savedSeasons(db: Db): Promise<number[]> {
 
 async function racePages(db: Db, data: SeasonData) {
   const pits = await db.select().from(pitStops).where(eq(pitStops.season, data.season))
+  const tracks = await db.select().from(circuits)
   return data.races.map((r) => ({
     key: `race:${data.season}:${r.round}`,
-    value: JSON.stringify(raceSnapshot(data, pits, r.round)),
+    value: JSON.stringify(raceSnapshot(data, pits, r.round, tracks)),
   }))
 }
 

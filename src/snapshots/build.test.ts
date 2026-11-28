@@ -57,6 +57,13 @@ describe('homeSnapshot', () => {
 
 describe('raceSnapshot', () => {
   const vegas = raceSnapshot(d, [], 21)
+
+  it('trae el circuito de la carrera si está cargado', () => {
+    const losail = { id: 'losail', length: 5380, altitude: 5, opened: 2004, firstGp: 2021, path: 'M2,98L98,98Z' }
+    const { id: _, ...track } = losail
+    expect(raceSnapshot(d, [], 22, [losail]).track).toEqual(track)
+    expect(raceSnapshot(d, [], 21, [losail]).track).toBeNull()
+  })
   const line = (code: string) => vegas.race.find((l) => l.code === code)!
 
   it('resultado con posiciones ganadas y vuelta rápida', () => {

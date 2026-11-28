@@ -1,7 +1,7 @@
 export type SessionKind = 'fp1' | 'fp2' | 'fp3' | 'quali' | 'sprint_quali' | 'sprint' | 'race'
 export type ResultKind = 'quali' | 'sprint_quali' | 'sprint' | 'race'
 
-export type RaceRow = { season: number; round: number; name: string; circuit: string; locality: string; country: string }
+export type RaceRow = { season: number; round: number; name: string; circuit: string; circuitId: string; locality: string; country: string }
 export type SessionRow = { season: number; round: number; kind: SessionKind; startsAt: Date; openf1Key: number | null }
 
 export type DriverRow = {
@@ -25,3 +25,5 @@ export type GridRow = {
   season: number; round: number; kind: 'race' | 'sprint'
   carNumber: number; position: number; source: 'openf1' | 'quali'
 }
+/** Longitud y altitud en metros. `path`: el trazado en un cuadro SVG de 100 × 100. */
+export type CircuitRow = { id: string; length: number; altitude: number; opened: number; firstGp: number; path: string }

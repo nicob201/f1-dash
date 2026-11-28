@@ -10,10 +10,10 @@ import quali21 from '../sources/__fixtures__/qualifying-2026-21.json'
 import results21 from '../sources/__fixtures__/results-2026-21.json'
 import { parseCalendar, parsePitStops, parseQualifying, parseResults, parseStandings } from '../sources/jolpica'
 import { matchSessionKeys, parseGrid, parseSessions } from '../sources/openf1'
-import { saveCalendar, saveGrid, savePitStops, saveResults, saveStandings } from './save'
+import { saveCalendar, saveCircuits, saveGrid, savePitStops, saveResults, saveStandings } from './save'
 
 const db = drizzle(env.DB)
-const TABLES = ['races', 'sessions', 'drivers', 'constructors', 'results', 'standings', 'pit_stops', 'grids']
+const TABLES = ['races', 'sessions', 'drivers', 'constructors', 'results', 'standings', 'pit_stops', 'grids', 'circuits']
 beforeEach(async () => {
   await env.DB.batch(TABLES.map((t) => env.DB.prepare(`delete from ${t}`)))
 })
@@ -21,6 +21,13 @@ const count = async (table: string, where = '1') =>
   (await env.DB.prepare(`select count(*) as n from ${table} where ${where}`).first<{ n: number }>())!.n
 const NOTHING = { drivers: [], constructors: [], results: [] }
 
+it('un circuito que se vuelve a cargar pisa al anterior', async () => {
+  const losail = { id: 'losail', length: 5380, altitude: 5, opened: 2004, firstGp: 2021, path: 'M2,98L98,98Z' }
+  await saveCircuits(db, [losail, { ...losail, id: 'monaco' }])
+  await saveCircuits(db, [{ ...losail, length: 5419 }])
+  const rows = await env.DB.prepare('select id, length from circuits order by id').all()
+  expect(rows.results).toEqual([{ id: 'losail', length: 5419 }, { id: 'monaco', length: 5380 }])
+})
 it('guardar dos veces no duplica', async () => {
   await saveResults(db, parseResults(results21, 'race'))
   await saveResults(db, parseResults(results21, 'race'))

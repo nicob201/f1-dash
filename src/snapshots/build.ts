@@ -2,7 +2,7 @@
 import { teamColor } from '../colors'
 import { finishingLabel, gpName, statusLabel, teamName } from '../format/es'
 import { driverCode, lastCompleteStandingsRound, lastRound, raceOf, resultsOf, standingsOf, type SeasonData } from '../notices/data'
-import type { PitStopRow, ResultRow } from '../types'
+import type { CircuitRow, PitStopRow, ResultRow } from '../types'
 import type { DriverRef, FastestLap, HomeSnapshot, RaceInfo, RaceSnapshot, ResultLine } from './types'
 
 type Calendar = Pick<SeasonData, 'season' | 'races' | 'sessions'>
@@ -95,8 +95,10 @@ export function homeSnapshot(d: SeasonData, upcoming: Calendar): HomeSnapshot {
   }
 }
 
-export function raceSnapshot(d: SeasonData, pits: PitStopRow[], round: number): RaceSnapshot {
+export function raceSnapshot(d: SeasonData, pits: PitStopRow[], round: number, circuits: CircuitRow[] = []): RaceSnapshot {
   const rounds = d.races.map((r) => r.round)
+  const circuitId = d.races.find((r) => r.round === round)?.circuitId
+  const circuit = circuits.find((c) => c.id === circuitId)
   const race = resultsOf(d, round, 'race')
   const teamThatDay = (driverId: string) =>
     d.results.find((r) => r.round === round && r.driverId === driverId)?.constructorId ?? currentTeam(d, driverId)
@@ -105,6 +107,7 @@ export function raceSnapshot(d: SeasonData, pits: PitStopRow[], round: number): 
     ...raceInfo(d, round),
     prev: rounds.includes(round - 1) ? round - 1 : null,
     next: rounds.includes(round + 1) ? round + 1 : null,
+    track: circuit ? { length: circuit.length, altitude: circuit.altitude, opened: circuit.opened, firstGp: circuit.firstGp, path: circuit.path } : null,
     race: race.map((r) => resultLine(d, r)),
     fastest: fastestLap(d, race),
     sprint: resultsOf(d, round, 'sprint').map((r) => resultLine(d, r)),

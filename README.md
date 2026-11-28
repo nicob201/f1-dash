@@ -2,12 +2,12 @@
 
 Canal de Telegram con los avisos de cada fin de semana de Fórmula 1 y un panel web con la temporada en curso. Todo en un Cloudflare Worker con D1, sin costo.
 
-Proyecto de un fan. No es un sitio oficial de la Fórmula 1. Datos: Jolpica y OpenF1.
+Proyecto de un fan. No es un sitio oficial de la Fórmula 1. Datos: Jolpica y OpenF1. Trazados de circuitos: [bacinger/f1-circuits](https://github.com/bacinger/f1-circuits) (MIT, © Tomislav Bacinger).
 
 - Diseño: `docs/2026-11-25-f1-dash-design.md`
 - Planes: `docs/superpowers/plans/`
 
-**Estado:** el bot contesta `/proxima`, `/ultima` y `/campeonato` por privado. La web tiene el inicio y las carreras; faltan el campeonato, las stats y el reloj (descarga de datos y publicación en el canal). Mientras no esté el reloj, los datos se actualizan a mano con `npm run seed -- --remote`.
+**Estado:** el bot contesta `/proxima`, `/ultima` y `/campeonato` por privado. La web tiene el inicio y las carreras, con el trazado de cada circuito; faltan el campeonato, las stats y el reloj (descarga de datos y publicación en el canal). Mientras no esté el reloj, los datos se actualizan a mano con `npm run seed -- --remote`.
 
 ## Comandos
 
@@ -21,6 +21,7 @@ npx wrangler d1 migrations apply f1-dash --local
 npm run seed             # carga la temporada 2026 en la base local (tarda unos minutos)
 npm run seed -- --remote # en la base de Cloudflare (ver abajo)
 npm run snapshots        # rearma los datos de la web sin descargar nada (también con -- --remote)
+npm run circuits         # carga trazados y datos de los circuitos, una vez (también con -- --remote)
 npm run avisos -- race-result 21  # muestra un mensaje armado con la base local
 npm run avisos -- --mi-chat       # id de tu chat privado con el bot
 npm run avisos -- race-result 21 --enviar  # te lo manda a ese chat

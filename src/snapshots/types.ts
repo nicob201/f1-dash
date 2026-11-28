@@ -32,9 +32,14 @@ export type HomeSnapshot = {
   upcoming: { season: number; races: RaceInfo[] }
 }
 
+/** Longitud y altitud en metros; `path`, el trazado en un cuadro SVG de 100 × 100. */
+export type Track = { length: number; altitude: number; opened: number; firstGp: number; path: string }
+
 export type RaceSnapshot = RaceInfo & {
   prev: number | null
   next: number | null
+  /** Sin datos del circuito, null. */
+  track: Track | null
   race: ResultLine[]
   fastest: FastestLap | null
   sprint: ResultLine[]

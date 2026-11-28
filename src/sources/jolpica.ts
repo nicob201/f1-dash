@@ -20,7 +20,7 @@ const calendarSchema = z.object({
           season: num,
           round: num,
           raceName: z.string(),
-          Circuit: z.object({ circuitName: z.string(), Location: z.object({ locality: z.string(), country: z.string() }) }),
+          Circuit: z.object({ circuitId: z.string(), circuitName: z.string(), Location: z.object({ locality: z.string(), country: z.string() }) }),
           FirstPractice: when.optional(),
           SecondPractice: when.optional(),
           ThirdPractice: when.optional(),
@@ -48,7 +48,7 @@ export function parseCalendar(body: unknown): { races: RaceRow[]; sessions: Sess
   for (const r of calendarSchema.parse(body).MRData.RaceTable.Races) {
     const { season, round } = r
     const { locality, country } = r.Circuit.Location
-    races.push({ season, round, name: r.raceName, circuit: r.Circuit.circuitName, locality, country })
+    races.push({ season, round, name: r.raceName, circuit: r.Circuit.circuitName, circuitId: r.Circuit.circuitId, locality, country })
     const add = (kind: SessionKind, w: z.infer<typeof when>) =>
       sessions.push({ season, round, kind, startsAt: utc(w), openf1Key: null })
     for (const [key, kind] of SESSION_KEYS) if (r[key]) add(kind, r[key])

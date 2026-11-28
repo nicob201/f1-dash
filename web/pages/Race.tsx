@@ -1,8 +1,8 @@
 // El detalle de una carrera. Una sección sin datos no se muestra.
 import type { ReactNode } from 'react'
 import { arDate } from '../../src/format/es'
-import type { DriverRef, RaceSnapshot, ResultLine } from '../../src/snapshots/types'
-import { resultPending } from '../lib'
+import type { DriverRef, RaceSnapshot, ResultLine, Track } from '../../src/snapshots/types'
+import { resultPending, trackFacts } from '../lib'
 import { Async, DriverTag, FastestNote, Link, PositionChip, Schedule, useJson, useTitle } from '../ui'
 
 export function Race({ season, round }: { season: number; round: number }) {
@@ -127,6 +127,28 @@ function Gained({ value }: { value: number | null }) {
   )
 }
 
+/** El trazado y los datos del circuito. En la computadora va en la columna de la izquierda. */
+function TrackPanel({ track, circuit }: { track: Track; circuit: string }) {
+  return (
+    <aside
+      aria-label="El circuito"
+      className="mt-6 flex items-center gap-5 bg-panel p-4 lg:sticky lg:top-6 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:mt-1 lg:block lg:self-start"
+    >
+      <svg viewBox="0 0 100 100" role="img" aria-label={`Trazado: ${circuit}`} className="w-28 shrink-0 lg:w-full">
+        <path d={track.path} fill="none" stroke="currentColor" strokeWidth={3} strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+      </svg>
+      <dl className="grow text-sm lg:mt-4">
+        {trackFacts(track).map(([label, value]) => (
+          <div key={label} className="flex items-baseline justify-between gap-3 border-t border-line py-1.5 first:border-t-0">
+            <dt className="text-muted">{label}</dt>
+            <dd className="condensed text-base">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </aside>
+  )
+}
+
 function Detail({ race }: { race: RaceSnapshot }) {
   useTitle(`${race.gp} ${race.season}`)
   const start = race.sessions.find((s) => s.kind === 'race')
@@ -134,78 +156,88 @@ function Detail({ race }: { race: RaceSnapshot }) {
   const byDriver = (r: DriverRef) => r.name
 
   return (
-    <article className="mx-auto max-w-3xl px-6 py-6">
-      {/* Las flechas van arriba para que el título use todo el ancho en mobile. */}
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-[13px] text-muted">
-          Ronda {race.round} de {race.rounds}
-          {start && `, ${arDate(new Date(start.startsAt))}`}
-        </p>
-        <nav aria-label="Otras carreras" className="flex gap-2">
-          {race.prev !== null && <Arrow season={race.season} round={race.prev} label="Carrera anterior" symbol="←" />}
-          {race.next !== null && <Arrow season={race.season} round={race.next} label="Carrera siguiente" symbol="→" />}
-        </nav>
-      </div>
-      <h1 className="title-gp mt-1.5 mb-1.5 text-5xl sm:text-6xl">{race.gp}</h1>
-      <p className="text-sm text-muted">{race.circuit}</p>
-
-      {race.race.length === 0 && (
-        <div className="mt-8">
-          {resultPending(race, new Date()) && <p className="mb-4 bg-panel px-4 py-3">Todavía no tenemos el resultado.</p>}
-          <Schedule sessions={race.sessions} />
+    <article
+      className={`mx-auto px-6 py-6 ${
+        race.track ? 'max-w-5xl lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-x-12' : 'max-w-3xl'
+      }`}
+    >
+      <header className="lg:col-start-2">
+        {/* Las flechas van arriba para que el título use todo el ancho en mobile. */}
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-[13px] text-muted">
+            Ronda {race.round} de {race.rounds}
+            {start && `, ${arDate(new Date(start.startsAt))}`}
+          </p>
+          <nav aria-label="Otras carreras" className="flex gap-2">
+            {race.prev !== null && <Arrow season={race.season} round={race.prev} label="Carrera anterior" symbol="←" />}
+            {race.next !== null && <Arrow season={race.season} round={race.next} label="Carrera siguiente" symbol="→" />}
+          </nav>
         </div>
-      )}
+        <h1 className="title-gp mt-1.5 mb-1.5 text-5xl sm:text-6xl">{race.gp}</h1>
+        <p className="text-sm text-muted">{race.circuit}</p>
+      </header>
 
-      <Section
-        title="Resultado"
-        rows={race.race}
-        rowKey={byDriver}
-        columns={[
-          position(),
-          driver(),
-          ...names<ResultLine>(),
-          time,
-          points,
-          { head: 'Posiciones', cell: (r) => <Gained value={r.gained} />, className: RIGHT },
-        ]}
-      >
-        {race.fastest && <FastestNote fastest={race.fastest} />}
-        <p className="mt-1 text-xs text-muted">Posiciones: las ganadas o perdidas desde la grilla.</p>
-      </Section>
+      {race.track && <TrackPanel track={race.track} circuit={race.circuit} />}
 
-      <Section
-        title="Sprint"
-        rows={race.sprint}
-        rowKey={byDriver}
-        columns={[position(), driver(), ...names<ResultLine>(), time, points]}
-      />
+      <div className="lg:col-start-2">
+        {race.race.length === 0 && (
+          <div className="mt-8">
+            {resultPending(race, new Date()) && <p className="mb-4 bg-panel px-4 py-3">Todavía no tenemos el resultado.</p>}
+            <Schedule sessions={race.sessions} />
+          </div>
+        )}
 
-      <Section
-        title="Clasificación"
-        rows={race.quali}
-        rowKey={byDriver}
-        columns={[
-          position(),
-          driver(),
-          ...(['q1', 'q2', 'q3'] as const).map((q) => ({
-            head: q.toUpperCase(),
-            cell: (r: RaceSnapshot['quali'][number]) => r[q] ?? '—',
-            className: `${RIGHT} text-[13px]`,
-          })),
-        ]}
-      />
+        <Section
+          title="Resultado"
+          rows={race.race}
+          rowKey={byDriver}
+          columns={[
+            position(),
+            driver(),
+            ...names<ResultLine>(),
+            time,
+            points,
+            { head: 'Posiciones', cell: (r) => <Gained value={r.gained} />, className: RIGHT },
+          ]}
+        >
+          {race.fastest && <FastestNote fastest={race.fastest} />}
+          <p className="mt-1 text-xs text-muted">Posiciones: las ganadas o perdidas desde la grilla.</p>
+        </Section>
 
-      <Section
-        title="Paradas en boxes"
-        rows={race.pits}
-        rowKey={(r) => `${r.name} ${r.stop}`}
-        columns={[
-          driver(),
-          { head: 'Parada', cell: (r) => r.stop, className: RIGHT },
-          { head: 'Vuelta', cell: (r) => r.lap, className: RIGHT },
-          { head: 'Duración', cell: (r) => r.duration ?? '—', className: RIGHT },
-        ]}
-      />
+        <Section
+          title="Sprint"
+          rows={race.sprint}
+          rowKey={byDriver}
+          columns={[position(), driver(), ...names<ResultLine>(), time, points]}
+        />
+
+        <Section
+          title="Clasificación"
+          rows={race.quali}
+          rowKey={byDriver}
+          columns={[
+            position(),
+            driver(),
+            ...(['q1', 'q2', 'q3'] as const).map((q) => ({
+              head: q.toUpperCase(),
+              cell: (r: RaceSnapshot['quali'][number]) => r[q] ?? '—',
+              className: `${RIGHT} text-[13px]`,
+            })),
+          ]}
+        />
+
+        <Section
+          title="Paradas en boxes"
+          rows={race.pits}
+          rowKey={(r) => `${r.name} ${r.stop}`}
+          columns={[
+            driver(),
+            { head: 'Parada', cell: (r) => r.stop, className: RIGHT },
+            { head: 'Vuelta', cell: (r) => r.lap, className: RIGHT },
+            { head: 'Duración', cell: (r) => r.duration ?? '—', className: RIGHT },
+          ]}
+        />
+      </div>
     </article>
   )
 }
