@@ -25,19 +25,19 @@ function raceInfo(c: Calendar, round: number): RaceInfo {
 
 const calendar = (c: Calendar): RaceInfo[] => c.races.map((r) => r.round).sort((a, b) => a - b).map((round) => raceInfo(c, round))
 
-function teamRef(d: SeasonData, constructorId: string) {
+export function teamRef(d: SeasonData, constructorId: string) {
   const row = d.constructors.find((c) => c.constructorId === constructorId)
   return { team: teamName(row?.name ?? constructorId), color: row?.color ?? teamColor(constructorId) }
 }
 
 /** El equipo es el que se pasa: en un resultado, con el que corrió esa fecha. */
-function driverRef(d: SeasonData, driverId: string, constructorId: string): DriverRef {
+export function driverRef(d: SeasonData, driverId: string, constructorId: string): DriverRef {
   const driver = d.drivers.find((x) => x.driverId === driverId)
   const name = driver ? `${driver.givenName} ${driver.familyName}` : driverId
   return { code: driverCode(d, driverId), name, ...teamRef(d, constructorId) }
 }
 
-const currentTeam = (d: SeasonData, driverId: string) =>
+export const currentTeam = (d: SeasonData, driverId: string) =>
   d.drivers.find((x) => x.driverId === driverId)?.constructorId ?? ''
 
 export function placesGained(grid: number | null, position: number | null, positionText: string | null): number | null {

@@ -48,3 +48,14 @@ export type RaceSnapshot = RaceInfo & {
 }
 
 export type HomeResponse = { channel: string | null; snapshot: HomeSnapshot }
+
+export type ChartLine = { code: string; color: string; highlight: boolean; dashed: boolean; points: (number | null)[] }
+export type ChampionshipSnapshot = {
+  season: number
+  /** La última ronda con las dos tablas. */
+  round: number
+  drivers: (DriverStanding & { wins: number })[]
+  constructors: (TeamStanding & { wins: number })[]
+  /** points[i] es el total tras rounds[i]; null si ese piloto no figuraba en esa tabla. */
+  chart: { rounds: number[]; lines: ChartLine[] }
+}
