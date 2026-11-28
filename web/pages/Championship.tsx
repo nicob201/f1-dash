@@ -1,6 +1,6 @@
 // Las dos tablas completas y el gráfico de puntos fecha a fecha.
 import type { ChampionshipSnapshot } from '../../src/snapshots/types'
-import { spreadLabels } from '../lib'
+import { linePath, spreadLabels } from '../lib'
 import { Async, DriverTag, NotFound, PositionChip, RIGHT, Section, useJson, useTitle, WIDE } from '../ui'
 
 type Chart = ChampionshipSnapshot['chart']
@@ -14,9 +14,6 @@ function PointsChart({ chart, season }: { chart: Chart; season: number }) {
   const top = Math.ceil(max / step) * step
   const x = (i: number) => (rounds.length > 1 ? (i / (rounds.length - 1)) * 100 : 50)
   const y = (p: number) => 100 - (p / top) * 100
-  // Un hueco (null) corta la línea: el piloto no figuraba en esa tabla.
-  const path = (points: (number | null)[]) =>
-    points.map((p, i) => (p === null ? '' : `${i === 0 || points[i - 1] === null ? 'M' : 'L'}${x(i)},${y(p)}`)).join('')
 
   const highlighted = lines.filter((l) => l.highlight)
   // Las resaltadas al final, y el líder último: queda arriba de todo.
@@ -43,7 +40,7 @@ function PointsChart({ chart, season }: { chart: Chart; season: number }) {
         {drawn.map((l) => (
           <path
             key={l.code}
-            d={path(l.points)}
+            d={linePath(l.points, x, y)}
             fill="none"
             stroke={l.highlight ? l.color : 'var(--color-muted)'}
             strokeOpacity={l.highlight ? 1 : 0.3}

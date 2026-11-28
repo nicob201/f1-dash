@@ -84,3 +84,19 @@ export function spreadLabels(ys: number[], gap: number, max: number): number[] {
 
 export const formatAverage = (v: number | null): string => (v === null ? '—' : v.toFixed(1).replace('.', ','))
 export const formatGained = (v: number): string => (v > 0 ? `+${v}` : String(v))
+
+/**
+ * El `d` de una línea del gráfico. Un null corta la línea; un punto suelto va como segmento de largo cero,
+ * que el extremo redondeado dibuja como un punto (un `M` solo no se ve).
+ */
+export function linePath(points: (number | null)[], x: (i: number) => number, y: (p: number) => number): string {
+  return points
+    .map((p, i) => {
+      if (p === null) return ''
+      const xy = `${x(i)},${y(p)}`
+      const starts = i === 0 || points[i - 1] === null
+      const alone = starts && (i === points.length - 1 || points[i + 1] === null)
+      return starts ? `M${xy}${alone ? `L${xy}` : ''}` : `L${xy}`
+    })
+    .join('')
+}

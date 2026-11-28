@@ -1,6 +1,6 @@
 import { season2026 } from '../src/notices/__fixtures__/season'
 import { homeSnapshot, raceSnapshot } from '../src/snapshots/build'
-import { channelUrl, countdown, formatAverage, formatGained, loadJson, matchRoute, nextRace, resultPending, spreadLabels, trackFacts } from './lib'
+import { channelUrl, countdown, formatAverage, formatGained, linePath, loadJson, matchRoute, nextRace, resultPending, spreadLabels, trackFacts } from './lib'
 
 const d = season2026()
 const NONE = { season: 2027, races: [], sessions: [] }
@@ -105,4 +105,16 @@ it('el promedio va con coma y un decimal, y sin llegadas es una raya', () => {
 })
 it('las posiciones ganadas llevan signo', () => {
   expect([formatGained(14), formatGained(0), formatGained(-3)]).toEqual(['+14', '0', '-3'])
+})
+
+describe('linePath', () => {
+  const x = (i: number) => i * 10
+  const y = (p: number) => 100 - p
+  it('un hueco corta la línea', () => {
+    expect(linePath([10, 20, null, 30, 40], x, y)).toBe('M0,90L10,80M30,70L40,60')
+  })
+  it('un punto suelto se dibuja: tras la primera ronda de la temporada cada línea tiene uno solo', () => {
+    expect(linePath([25], x, y)).toBe('M0,75L0,75')
+    expect(linePath([null, 5, null], x, y)).toBe('M10,95L10,95')
+  })
 })
